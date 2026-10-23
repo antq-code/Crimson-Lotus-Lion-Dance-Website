@@ -23,11 +23,12 @@ export const site = {
 
   team: {
     title: 'Our Team',
-    // Add as many photos as you like; the carousel scrolls through them.
+    // Add as many photos as you like; the gallery loops through them.
+    // title shows under each photo; description shows when a photo is clicked open.
     photos: [
-      { src: '/images/teamIMG.jpg', alt: 'Team group photo' },
-      { src: '/images/teamIMG2.jpg', alt: 'Dancer holding a purple lion head' },
-      { src: '/images/teamIMG3.jpg', alt: 'Team members warming up' },
+      { src: '/images/teamIMG.jpg', title: 'The Team', description: '', alt: 'Team group photo' },
+      { src: '/images/teamIMG2.jpg', title: 'Purple Lion', description: '', alt: 'Dancer holding a purple lion head' },
+      { src: '/images/teamIMG3.jpg', title: 'Warm-Ups', description: '', alt: 'Team members warming up' },
     ],
   },
 

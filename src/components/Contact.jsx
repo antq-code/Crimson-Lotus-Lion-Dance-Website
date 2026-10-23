@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { site } from '../content.js';
+import Glow from './Glow.jsx';
 
 const icons = {
   email: (
@@ -81,23 +82,29 @@ export default function Contact() {
             Message
             <textarea name="message" rows="5" placeholder="How can we help?" required />
           </label>
-          <button type="submit" className="submit-btn">Send</button>
+          <Glow className="glow-btn" glowIntensity={1.8}>
+            <button type="submit" className="submit-btn">Send</button>
+          </Glow>
           {status && <p className="form-status">{status}</p>}
         </form>
         <ul className="socials">
           {Object.entries(socials).map(([name, href]) => (
             <li key={name}>
-              <a href={href} target={name === 'email' ? undefined : '_blank'} rel="noreferrer" aria-label={name}>
-                <svg viewBox="0 0 24 24" width="20" height="20">{icons[name]}</svg>
-              </a>
+              <Glow backgroundColor="#ffffff" borderRadius={10} glowRadius={20} glowIntensity={1.8}>
+                <a href={href} target={name === 'email' ? undefined : '_blank'} rel="noreferrer" aria-label={name}>
+                  <svg viewBox="0 0 24 24" width="20" height="20">{icons[name]}</svg>
+                </a>
+              </Glow>
             </li>
           ))}
         </ul>
         <div className="contact-links">
           {links.map((link) => (
-            <a key={link.href} href={link.href} target="_blank" rel="noreferrer" className="outline-btn">
-              {link.label}
-            </a>
+            <Glow key={link.href} className="glow-btn" glowIntensity={1.8}>
+              <a href={link.href} target="_blank" rel="noreferrer" className="outline-btn">
+                {link.label}
+              </a>
+            </Glow>
           ))}
         </div>
       </div>

@@ -1,7 +1,7 @@
 import Navbar from './components/Navbar.jsx';
 import Hero from './components/Hero.jsx';
 import Mission from './components/Mission.jsx';
-import TeamCarousel from './components/TeamCarousel.jsx';
+import TeamGallery from './components/TeamGallery.jsx';
 import Contact from './components/Contact.jsx';
 
 export default function App() {
@@ -11,7 +11,7 @@ export default function App() {
       <main>
         <Hero />
         <Mission />
-        <TeamCarousel />
+        <TeamGallery />
         <Contact />
       </main>
       <footer className="footer">
