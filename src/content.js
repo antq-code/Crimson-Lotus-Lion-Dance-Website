@@ -18,7 +18,7 @@ export const site = {
   mission: {
     title: 'Mission Statement',
     text:
-      'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident.',
+      'Founded in 2024 by Texas A&M student lion dancers who wanted to keep this tradition thriving in College Station. We perform at festivals, grand openings, and community events across Texas, from our second home in College Station to Houston, Dallas, and Austin, bringing blessings of good fortune and prosperity. On campus, we offer workshops that open the art to students of every background and experience level, passing on the rhythm, discipline, and spirit of lion dance to the next generation. We are a team built on culture, respect for tradition, and the joy of bringing a crowd to its feet.',
     image: '/images/missionIMG.jpg',
     imageAlt: 'Lions performing on stage',
   },
