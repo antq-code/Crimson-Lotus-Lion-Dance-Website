@@ -1,8 +1,15 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { site } from '../content.js';
 import Glow from './Glow.jsx';
+import Turnstile from './Turnstile.jsx';
 
 const icons = {
+  gmail: (
+    <path
+      fill="#EA4335"
+      d="M2 6.5A1.5 1.5 0 0 1 4.4 5.3L12 11l7.6-5.7A1.5 1.5 0 0 1 22 6.5v11a1.5 1.5 0 0 1-1.5 1.5H18v-8.4l-6 4.5-6-4.5V19H3.5A1.5 1.5 0 0 1 2 17.5v-11Z"
+    />
+  ),
   email: (
     <path d="M4 6h16v12H4z M4 7l8 6 8-6" fill="none" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
   ),
@@ -33,35 +40,71 @@ const icons = {
   ),
 };
 
+// Local date as YYYY-MM-DD, so the date picker can't pick a day in the past.
+const today = () => {
+  const d = new Date();
+  return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
+};
+
+const GENERIC_ERROR = 'Sorry, we couldn’t send your message. Please try again, or email us using the address below.';
+
 export default function Contact() {
-  const { title, backgroundImage, email, formEndpoint, socials, links } = site.contact;
-  const [status, setStatus] = useState('');
+  const { title, backgroundImage, email, api, turnstileSiteKey, eventTypes, socials, links } = site.contact;
+  const [status, setStatus] = useState({ state: 'idle', message: '' });
+  const [token, setToken] = useState('');
+  const [copied, setCopied] = useState(false);
+  const turnstileRef = useRef(null);
+  const emailRef = useRef(null);
+  const sending = status.state === 'sending';
+  const gmailUrl = `https://mail.google.com/mail/?view=cm&to=${email}&su=Booking%20inquiry`;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const data = Object.fromEntries(new FormData(e.currentTarget));
+    if (sending) return;
+    const form = e.currentTarget;
 
-    if (!formEndpoint) {
-      const body = `${data.message}\n\n— ${data.name} (${data.email})`;
-      window.location.href = `mailto:${email}?subject=${encodeURIComponent(
-        'Performance inquiry from ' + data.name
-      )}&body=${encodeURIComponent(body)}`;
+    if (!token) {
+      setStatus({ state: 'error', message: 'Please complete the verification check above the Send button.' });
       return;
     }
 
-    setStatus('Sending…');
+    setStatus({ state: 'sending', message: 'Sending your message…' });
     try {
-      const res = await fetch(formEndpoint, {
+      const res = await fetch(api, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-        body: JSON.stringify(data),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...Object.fromEntries(new FormData(form)), turnstileToken: token }),
       });
-      if (!res.ok) throw new Error();
-      e.target.reset();
-      setStatus('Thanks! We’ll be in touch soon.');
+      const result = await res.json().catch(() => ({}));
+      if (!res.ok || !result.ok) {
+        // The Worker's 4xx messages are written for visitors (e.g. "Please enter a valid email").
+        const message = res.status >= 400 && res.status < 500 && result.error ? result.error : GENERIC_ERROR;
+        setStatus({ state: 'error', message });
+        return;
+      }
+      form.reset();
+      setStatus({ state: 'success', message: 'Thank you! Your message has been sent, and we’ll get back to you soon.' });
     } catch {
-      setStatus('Something went wrong — please email us directly.');
+      setStatus({ state: 'error', message: GENERIC_ERROR });
+    } finally {
+      // Tokens are single-use, so every attempt needs a fresh check.
+      turnstileRef.current?.reset();
     }
+  };
+
+  const copyEmail = async () => {
+    try {
+      await navigator.clipboard.writeText(email);
+    } catch {
+      // Older browsers / insecure contexts: select the address so the user can copy it.
+      const range = document.createRange();
+      range.selectNodeContents(emailRef.current);
+      window.getSelection().removeAllRanges();
+      window.getSelection().addRange(range);
+      document.execCommand?.('copy');
+    }
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2500);
   };
 
   return (
@@ -69,24 +112,81 @@ export default function Contact() {
       <div className="contact-overlay" />
       <div className="contact-inner container">
         <h2 className="section-title">{title}</h2>
-        <form className="contact-form" onSubmit={handleSubmit}>
+        <form className="contact-form" onSubmit={handleSubmit} aria-busy={sending} aria-describedby="form-required-note">
+          <p id="form-required-note" className="form-note">Fields marked <span aria-hidden="true">*</span><span className="sr-only">with an asterisk</span> are required.</p>
           <label>
-            Name
-            <input name="name" type="text" placeholder="Your name" required />
+            <span>Name <span className="req" aria-hidden="true">*</span></span>
+            <input name="name" type="text" autoComplete="name" placeholder="Your name" maxLength={100} required />
           </label>
           <label>
-            Email
-            <input name="email" type="email" placeholder="you@example.com" required />
+            <span>Email <span className="req" aria-hidden="true">*</span></span>
+            <input name="email" type="email" autoComplete="email" placeholder="you@example.com" maxLength={254} required />
           </label>
+          <div className="form-row">
+            <label>
+              Event date
+              <input name="eventDate" type="date" min={today()} />
+            </label>
+            <label>
+              Event type
+              <select name="eventType" defaultValue="">
+                <option value="">Select…</option>
+                {eventTypes.map((type) => (
+                  <option key={type} value={type}>{type}</option>
+                ))}
+              </select>
+            </label>
+          </div>
           <label>
-            Message
-            <textarea name="message" rows="5" placeholder="How can we help?" required />
+            <span>Message <span className="req" aria-hidden="true">*</span></span>
+            <textarea name="message" rows="5" placeholder="Tell us about your event: location, time, number of lions…" maxLength={5000} required />
           </label>
+
+          {/* Honeypot: hidden from people and screen readers; bots that fill it are ignored by the Worker. */}
+          <div className="hp-field" aria-hidden="true">
+            <label>
+              Website
+              <input name="website" type="text" tabIndex={-1} autoComplete="off" />
+            </label>
+          </div>
+
+          <Turnstile
+            ref={turnstileRef}
+            siteKey={turnstileSiteKey}
+            onToken={setToken}
+            onError={() => setStatus({ state: 'error', message: 'The verification check couldn’t load. Please refresh the page, or email us using the address below.' })}
+          />
+
           <Glow className="glow-btn" glowIntensity={1.8}>
-            <button type="submit" className="submit-btn">Send</button>
+            <button type="submit" className="submit-btn" disabled={sending}>
+              {sending ? 'Sending…' : 'Send'}
+            </button>
           </Glow>
-          {status && <p className="form-status">{status}</p>}
+
+          <p className="form-status is-success" role="status">
+            {status.state === 'success' || status.state === 'sending' ? status.message : ''}
+          </p>
+          <p className="form-status is-error" role="alert">
+            {status.state === 'error' ? status.message : ''}
+          </p>
         </form>
+
+        <div className="contact-fallback">
+          <p>Prefer email? Write to us directly:</p>
+          <div className="fallback-row">
+            <span className="fallback-email" ref={emailRef}>{email}</span>
+            <button type="button" className="copy-btn" onClick={copyEmail}>
+              {copied ? 'Copied!' : 'Copy'}
+            </button>
+            <Glow backgroundColor="#ffffff" borderRadius={10} glowRadius={20} glowIntensity={1.8}>
+              <a className="gmail-link" href={gmailUrl} target="_blank" rel="noreferrer" aria-label="Email us in Gmail (opens in a new tab)">
+                <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">{icons.gmail}</svg>
+              </a>
+            </Glow>
+          </div>
+          <p className="sr-only" role="status">{copied ? 'Email address copied to clipboard.' : ''}</p>
+        </div>
+
         <ul className="socials">
           {Object.entries(socials).map(([name, href]) => (
             <li key={name}>

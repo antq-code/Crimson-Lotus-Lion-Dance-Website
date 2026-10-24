@@ -1,0 +1,5 @@
+# Copy to .dev.vars for `npm run dev` (wrangler dev). Never commit .dev.vars.
+# Cloudflare's Turnstile test secret: accepts any token from the test site key.
+TURNSTILE_SECRET=1x0000000000000000000000000000000AA
+# Lets the Vite dev server call the local Worker.
+DEV_ORIGIN=http://localhost:5173

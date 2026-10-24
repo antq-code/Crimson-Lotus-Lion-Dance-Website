@@ -3,8 +3,15 @@ name: Build and Deploy
 on:
   push:
     branches: [main]
+    # Worker-only changes are deployed by deploy-worker.yml; no need to rebuild the site.
+    paths-ignore:
+      - 'worker/**'
+      - '.github/workflows/deploy-worker.yml'
   pull_request:
     branches: [main]
+    paths-ignore:
+      - 'worker/**'
+      - '.github/workflows/deploy-worker.yml'
 
 permissions:
   contents: read

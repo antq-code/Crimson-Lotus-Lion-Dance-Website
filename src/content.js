@@ -35,11 +35,24 @@ export const site = {
   contact: {
     title: 'Reach out to us for performances!',
     backgroundImage: '/images/contactIMG.jpg',
-    email: 'crimsonlotus@example.com',
-    // Optional: a form service endpoint (e.g. Formspree). If empty, the form opens the user's mail app.
-    formEndpoint: '',
+    // Shown next to the form as a fallback. The form itself sends through the Cloudflare
+    // Worker in /worker; its destination address is set in worker/wrangler.toml.
+    email: 'crimsonlotuslions@gmail.com',
+    // The contact Worker. In dev, point it at a local `wrangler dev` with VITE_CONTACT_API.
+    api: import.meta.env.VITE_CONTACT_API || 'https://api.crimsonlotusld.com/contact',
+    // Turnstile site key (public). Dev uses Cloudflare's always-pass test key.
+    turnstileSiteKey: import.meta.env.DEV ? '1x00000000000000000000AA' : 'YOUR_SITE_KEY',
+    eventTypes: [
+      'Lunar New Year',
+      'Wedding',
+      'Grand opening',
+      'Festival or cultural event',
+      'School or community event',
+      'Corporate event',
+      'Other',
+    ],
     socials: {
-      email: 'mailto:crimsonlotus@example.com',
+      email: 'mailto:crimsonlotuslions@gmail.com',
       instagram: 'https://www.instagram.com/crimsonlotusld/',
       youtube: 'https://www.youtube.com/@crimsonlotusliondance',
       discord: 'https://discord.com/invite/v7aPxyUg9f',
