@@ -1,3 +1,4 @@
+import AuraBackground from './components/AuraBackground.jsx';
 import Navbar from './components/Navbar.jsx';
 import Hero from './components/Hero.jsx';
 import Mission from './components/Mission.jsx';
@@ -7,16 +8,20 @@ import Contact from './components/Contact.jsx';
 export default function App() {
   return (
     <>
+      <AuraBackground />
       <Navbar />
-      <main>
-        <Hero />
-        <Mission />
-        <TeamGallery />
-        <Contact />
-      </main>
-      <footer className="footer">
-        © {new Date().getFullYear()} Crimson Lotus Lion Dance
-      </footer>
+      {/* Sits above the fixed aura layers. */}
+      <div className="page">
+        <main>
+          <Hero />
+          <Mission />
+          <TeamGallery />
+          <Contact />
+        </main>
+        <footer className="footer">
+          © {new Date().getFullYear()} Crimson Lotus Lion Dance
+        </footer>
+      </div>
     </>
   );
 }

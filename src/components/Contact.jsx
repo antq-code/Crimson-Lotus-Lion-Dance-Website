@@ -98,8 +98,12 @@ export default function Contact() {
   };
 
   return (
-    <section id="contact" className="contact" style={{ backgroundImage: `url(${backgroundImage})` }}>
-      <div className="contact-overlay" />
+    <section id="contact" className="contact">
+      <div
+        className="contact-bg"
+        aria-hidden="true"
+        style={{ backgroundImage: `linear-gradient(rgba(9, 6, 6, 0.68), rgba(9, 6, 6, 0.68)), url(${backgroundImage})` }}
+      />
       <div className="contact-inner container">
         <h2 className="section-title">{title}</h2>
         <form className="contact-form" onSubmit={handleSubmit} aria-busy={sending} aria-describedby="form-required-note">

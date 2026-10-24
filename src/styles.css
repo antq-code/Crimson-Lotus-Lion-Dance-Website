@@ -1,12 +1,14 @@
 :root {
-  --bg: #0f0f0f;
+  /* Near-black with a touch of red; the aura background blends against it. */
+  --bg: #090606;
   --text: #f2ede4;
   --muted: #cfc8bb;
   --gold: #c9a227;
   --gold-light: #f3d77a;
   --gold-dark: #8a6a12;
-  --olive: #6e6520;
-  --olive-dark: #4f4815;
+  /* Reds from the lotus logo. */
+  --crimson: #d51f1f;
+  --crimson-dark: #be0c0b;
   --radius: 14px;
   --serif: 'Cinzel', Georgia, serif;
 }
@@ -61,6 +63,53 @@ a {
   color: #8d8070;
   font-size: 0.8rem;
   letter-spacing: 0.05em;
+}
+
+/* ---------- Aura background ---------- */
+/* "Smoked Lilac" aura, recoloured to near-black with a hint of logo red. */
+.aura-bg {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.aura-layer-1,
+.aura-layer-2,
+.aura-grain {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.aura-layer-1 {
+  background: linear-gradient(140deg, #070505 0%, #0e0708 38%, #19080b 68%, #24090d 100%);
+  mix-blend-mode: normal;
+  transform: translateZ(0);
+}
+
+.aura-layer-2 {
+  background: radial-gradient(ellipse 50% 45% at 62% 40%, rgba(255, 110, 100, 0.09) 0%, rgba(213, 31, 31, 0.05) 48%, transparent 75%);
+  mix-blend-mode: screen;
+  filter: blur(113px);
+  transform: translateZ(0);
+  will-change: transform;
+}
+
+.aura-grain {
+  mix-blend-mode: overlay;
+  opacity: 0.85;
+}
+
+@media (min-width: 861px) {
+  .aura-layer-2 {
+    filter: blur(162px);
+  }
+}
+
+.page {
+  position: relative;
+  z-index: 1;
 }
 
 /* ---------- Navbar ---------- */
@@ -148,12 +197,9 @@ a {
   position: absolute;
   inset: 0;
   background: #2a1a1f center / cover no-repeat;
-}
-
-.hero-fade {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(to bottom, transparent 35%, rgba(15, 15, 15, 0.7) 60%, var(--bg) 85%);
+  /* Fade the photo out (rather than painting a solid colour over it) so it melts into the aura background. */
+  -webkit-mask-image: linear-gradient(to bottom, #000 35%, rgba(0, 0, 0, 0.3) 60%, transparent 85%);
+  mask-image: linear-gradient(to bottom, #000 35%, rgba(0, 0, 0, 0.3) 60%, transparent 85%);
 }
 
 .hero-grid {
@@ -162,11 +208,68 @@ a {
   pointer-events: none;
 }
 
+.hero-heading {
+  position: relative;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 3vw;
+  padding-inline: 16px;
+  text-align: center;
+}
+
 .wordmark {
   position: relative;
   /* Spans the hero with 240px clear on the left and right. */
   width: calc(100% - 480px);
-  margin: 0 0 3vw;
+  margin: 0;
+}
+
+.hero-tagline {
+  /* 18px + 40px below the lettering. */
+  margin: 58px 0 0;
+  /* Same size as the motto. */
+  font-size: clamp(1.1rem, 2vw, 1.75rem);
+  letter-spacing: 0.04em;
+  color: var(--text);
+}
+
+.team-motto {
+  /* Sits under the "Our Team" heading, above the gallery. */
+  margin: -12px auto 40px;
+  padding-inline: 16px;
+  text-align: center;
+  font-size: clamp(1.1rem, 2vw, 1.75rem);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: var(--gold-light);
+}
+
+/* ---------- Glow text ---------- */
+/* Same gold glow as the arch border: faint at rest, bright near the cursor. */
+.glow-text {
+  --glow: 0;
+  --mx: -9999px;
+  --my: -9999px;
+  position: relative;
+  text-shadow: 0 0 10px rgba(201, 162, 39, 0.3);
+}
+
+.glow-text-lit {
+  position: absolute;
+  inset: calc(var(--bleed) * -1);
+  padding: var(--bleed);
+  color: #fff3c4;
+  text-shadow:
+    0 0 4px var(--gold-light),
+    0 0 14px rgba(243, 215, 122, 0.75),
+    0 0 32px rgba(201, 162, 39, 0.55);
+  opacity: var(--glow);
+  -webkit-mask-image: radial-gradient(circle 200px at var(--mx) var(--my), #000 0%, rgba(0, 0, 0, 0.55) 45%, transparent 100%);
+  mask-image: radial-gradient(circle 200px at var(--mx) var(--my), #000 0%, rgba(0, 0, 0, 0.55) 45%, transparent 100%);
+  transition: opacity 0.25s ease-out;
+  pointer-events: none;
 }
 
 .wordmark img {
@@ -180,7 +283,8 @@ a {
   grid-template-columns: 1fr 1.25fr;
   gap: clamp(32px, 8vw, 130px);
   align-items: start;
-  padding: 24px 0 100px;
+  /* 104px = the original 24px + 80px of breathing room below the hero lettering. */
+  padding: 104px 0 100px;
 }
 
 .mission h2 {
@@ -200,7 +304,9 @@ a {
   width: 100%;
   aspect-ratio: 740 / 470;
   object-fit: cover;
+  border: 3px solid var(--gold);
   border-radius: var(--radius);
+  box-shadow: 0 0 18px rgba(201, 162, 39, 0.25);
 }
 
 /* ---------- Team gallery ---------- */
@@ -223,6 +329,11 @@ a {
   pointer-events: none;
 }
 
+.team-arch-glow {
+  opacity: 0;
+  transition: opacity 0.25s ease-out;
+}
+
 .team-gallery.is-outside-arch .circular-gallery {
   cursor: default;
 }
@@ -230,15 +341,19 @@ a {
 /* ---------- Contact ---------- */
 .contact {
   position: relative;
-  background: #1c2230 center / cover no-repeat;
-  box-shadow: inset 0 18px 24px -12px rgba(0, 0, 0, 0.7);
-  padding: 40px 0 70px;
+  padding: 120px 0 140px;
 }
 
-.contact-overlay {
+/* Photo + darkening tint, faded out at the top and bottom (like the hero) so the
+   section blends into the background instead of starting at a hard edge. */
+.contact-bg {
   position: absolute;
   inset: 0;
-  background: rgba(14, 16, 24, 0.68);
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, #000 22%, #000 78%, transparent 100%);
+  mask-image: linear-gradient(to bottom, transparent 0%, #000 22%, #000 78%, transparent 100%);
 }
 
 .contact-inner {

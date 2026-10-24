@@ -5,7 +5,6 @@ export default function Hero() {
   return (
     <section id="top" className="hero">
       <div className="hero-image" style={{ backgroundImage: `url(${site.heroImage})` }} />
-      <div className="hero-fade" />
       {/* Interactive gold grid over the photo; the canvas ignores clicks, so links still work. */}
       <div className="hero-grid">
         <CursorGrid
@@ -22,9 +21,12 @@ export default function Hero() {
           clickPulse
         />
       </div>
-      <h1 className="wordmark">
-        <img src={site.lettering} alt={site.name} />
-      </h1>
+      <div className="hero-heading">
+        <h1 className="wordmark">
+          <img src={site.lettering} alt={site.name} />
+        </h1>
+        <p className="hero-tagline">{site.tagline}</p>
+      </div>
     </section>
   );
 }

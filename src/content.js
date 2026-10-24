@@ -6,6 +6,8 @@ export const site = {
   logo: '/images/Crimson_Lotus_Logo_HD.svg',
   lettering: '/images/Crimson_Lotus_Gold_Lettering.svg',
   heroImage: '/images/heroIMG.jpg',
+  tagline: "Welcome to College Station's one and only Lion Dance Team!",
+  motto: 'Strength Through Tradition, Power in Motion',
 
   nav: [
     { label: 'Our Team', href: '#team' },
@@ -29,6 +31,14 @@ export const site = {
       { src: '/images/teamIMG.jpg', title: 'The Team', description: '', alt: 'Team group photo' },
       { src: '/images/teamIMG2.jpg', title: 'Purple Lion', description: '', alt: 'Dancer holding a purple lion head' },
       { src: '/images/teamIMG3.jpg', title: 'Warm-Ups', description: '', alt: 'Team members warming up' },
+      { src: '/images/gallery/lion-closeup.jpg', title: 'Up Close', description: '', alt: 'Close-up of a red and white lion head with gold trim' },
+      { src: '/images/gallery/meet-the-lion.jpg', title: 'Meet the Lion', description: '', alt: 'Team member in a jersey standing beside a white and pink lion' },
+      { src: '/images/gallery/uniform-reveal-steps.jpg', title: 'Uniform Reveal', description: '', alt: 'Team posing on the steps of a columned building, holding red banners' },
+      { src: '/images/gallery/uniform-reveal-doorway.jpg', title: 'Standing Tall', description: '', alt: 'Red and black lion rearing up in a doorway between stone columns' },
+      { src: '/images/gallery/uniform-reveal-red-lion.jpg', title: 'Red Lion', description: '', alt: 'Red lion performing on stone steps in front of columns' },
+      { src: '/images/gallery/otaku-festival-huddle.jpg', title: 'Team Huddle', description: '', alt: 'Team members bumping fists in a huddle before a performance' },
+      { src: '/images/gallery/otaku-festival-performance.jpg', title: 'Otaku Food Festival', description: '', alt: 'Three lions performing inside a shopping mall' },
+      { src: '/images/gallery/otaku-festival-group.jpg', title: 'Festival Crew', description: '', alt: 'Team group photo with lions inside a shopping mall' },
     ],
   },
 

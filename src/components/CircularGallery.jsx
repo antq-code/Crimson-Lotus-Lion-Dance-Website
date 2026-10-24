@@ -75,6 +75,8 @@ uniform vec3 uRingColor;
 uniform float uRingWidth;
 uniform float uRingGap;
 uniform float uFade;
+uniform vec3 uBorderColor;
+uniform float uBorderWidth;
 uniform float uShadow;
 uniform float uBlur;
 uniform vec2 uShadowOffset;
@@ -115,6 +117,10 @@ void main() {
   vec3 color = mix(uPlaceholder, image, uReady);
   float luma = dot(color, vec3(0.2126, 0.7152, 0.0722));
   color = mix(color, vec3(luma), uGray) * (1.0 - uDim);
+  if (uBorderWidth > 0.0) {
+    float inner = clamp(0.5 - (d + uBorderWidth) / pixel, 0.0, 1.0);
+    color = mix(uBorderColor * (1.0 - uDim), color, inner);
+  }
   float body = cover * mix(0.08, 1.0, uReady);
   float band = abs(d - uRingGap - uRingWidth * 0.5) - uRingWidth * 0.5;
   float ring = clamp(0.5 - band / pixel, 0.0, 1.0) * uRing;
@@ -241,6 +247,8 @@ const CircularGallery = ({
   fadeEdges = 0.12,
   shadow = 0.25,
   grayscale = false,
+  borderColor,
+  borderWidth = 0,
   showTitles = true,
   snap = true,
   autoScroll = 0,
@@ -277,6 +285,8 @@ const CircularGallery = ({
     fadeEdges: clamp(fadeEdges, 0, 0.5),
     shadow: clamp(shadow, 0, 1),
     grayscale,
+    borderColor,
+    borderWidth: Math.max(0, borderWidth),
     showTitles,
     snap,
     autoScroll,
@@ -560,6 +570,8 @@ const CircularGallery = ({
       gl.uniform3fv(u.uRingColor, parse(s.textColor));
       gl.uniform1f(u.uRingWidth, 2 * ratio);
       gl.uniform1f(u.uRingGap, 5 * ratio);
+      gl.uniform3fv(u.uBorderColor, parse(s.borderColor || '#000000'));
+      gl.uniform1f(u.uBorderWidth, s.borderColor ? s.borderWidth * ratio : 0);
       gl.activeTexture(gl.TEXTURE0);
       gl.uniform1i(u.uTexture, 0);
       const count = SEGMENTS_X * SEGMENTS_Y * 6;
@@ -603,11 +615,6 @@ const CircularGallery = ({
       ensurePool(metrics.spacing);
       const used = new Set();
       const font = fontRef.current;
-      const fade = value => {
-        if (s.fadeEdges <= 0) return 1;
-        const t = clamp(value / s.fadeEdges, 0, 1);
-        return t * t * t * (t * (t * 6 - 15) + 10);
-      };
       if (s.showTitles) {
         cards.forEach(card => {
           if (!card.item.text) return;
@@ -628,11 +635,10 @@ const CircularGallery = ({
           const y = card.y - Math.cos(card.angle) * offset;
           const cssX = view.width / 2 + x;
           const cssY = view.height / 2 - y;
-          const edge = fade(cssX / view.width) * fade(1 - cssX / view.width);
           entry.el.style.fontSize = `${size}px`;
           entry.el.style.color = s.textColor;
           entry.el.style.transform = `translate(${cssX}px, ${cssY}px) translate(-50%, -50%) rotate(${-card.angle}rad)`;
-          entry.el.style.opacity = String(card.alpha * card.labelAlpha * mix(edge, 1, card.focus));
+          entry.el.style.opacity = String(card.alpha * card.labelAlpha);
         });
       }
       pool.forEach(entry => {
@@ -1055,7 +1061,7 @@ const CircularGallery = ({
     <div
       ref={containerRef}
       className={`${CLASSES.root}${className ? ` ${className}` : ''}`}
-      style={{ color: textColor, ...style }}
+      style={{ color: textColor, '--cg-fade': `${settings.fadeEdges * 100}%`, ...style }}
       role="region"
       aria-roledescription="carousel"
       aria-label="Image gallery"

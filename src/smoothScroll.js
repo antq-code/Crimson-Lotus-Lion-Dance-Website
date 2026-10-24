@@ -16,13 +16,10 @@ export function smoothScrollTo(hash) {
 
   history.pushState(null, '', hash);
 
-  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-    window.scrollTo(0, end);
-    return;
-  }
-
-  // Longer trips take a little longer, within 700–1400ms.
-  const duration = Math.min(1400, Math.max(700, Math.abs(distance) * 0.5));
+  // Longer trips take a little longer, within 700–1400ms. When the device asks for
+  // reduced motion (e.g. Windows "Animation effects" off), keep a short, gentle glide.
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const duration = reduced ? 450 : Math.min(1400, Math.max(700, Math.abs(distance) * 0.5));
   const startTime = performance.now();
   cancelAnimationFrame(frame);
 
