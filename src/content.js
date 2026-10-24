@@ -41,7 +41,7 @@ export const site = {
     // The contact Worker. In dev, point it at a local `wrangler dev` with VITE_CONTACT_API.
     api: import.meta.env.VITE_CONTACT_API || 'https://api.crimsonlotusld.com/contact',
     // Turnstile site key (public). Dev uses Cloudflare's always-pass test key.
-    turnstileSiteKey: import.meta.env.DEV ? '1x00000000000000000000AA' : 'YOUR_SITE_KEY',
+    turnstileSiteKey: import.meta.env.DEV ? '1x00000000000000000000AA' : '0x4AAAAAAFjqLx_FS2nvtKWv',
     eventTypes: [
       'Lunar New Year',
       'Wedding',
