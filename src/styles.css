@@ -405,14 +405,6 @@ a {
   background: rgba(201, 162, 39, 0.14);
 }
 
-.gmail-link {
-  display: grid;
-  place-items: center;
-  width: 42px;
-  height: 42px;
-  border-radius: 10px;
-  background: #fff;
-}
 
 .contact-form :focus-visible,
 .contact-fallback :focus-visible,

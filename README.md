@@ -19,7 +19,7 @@ The booking form on the site sends messages to the team's Gmail through a Cloudf
 3. The Worker (`/worker`) checks the request came from crimsonlotusld.com, ignores bots that fill the hidden "website" honeypot field, validates the fields, and verifies the Turnstile token with Cloudflare.
 4. It emails the request through Cloudflare Email Routing, from `contact@crimsonlotusld.com`, with Reply-To set to the visitor, so hitting Reply in Gmail answers them directly.
 
-The address is also shown next to the form (with a Copy button and a Gmail link) as a fallback.
+The address is also shown next to the form (with a Copy button) as a fallback.
 
 **Where things live**
 - `src/components/Contact.jsx`: the form, the fallback email row, and the success/error messages
@@ -31,7 +31,7 @@ The address is also shown next to the form (with a Copy button and a Gmail link)
 **Changing the destination email**
 1. In Cloudflare: **Email → Email Routing → Destination addresses**, add the new address and click the verification link sent to it.
 2. In `worker/wrangler.toml`, change both `destination_address` (under `[[send_email]]`) and `CONTACT_TO` to the new address.
-3. In `src/content.js`, change `contact.email` (the fallback address shown on the site) and the `mailto:` in `socials.email`.
+3. In `src/content.js`, change `contact.email` (the fallback address shown on the site).
 4. Commit and push. GitHub Actions redeploys the Worker and the site.
 
 **Secrets**

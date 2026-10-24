@@ -52,7 +52,6 @@ export const site = {
       'Other',
     ],
     socials: {
-      email: 'mailto:crimsonlotuslions@gmail.com',
       instagram: 'https://www.instagram.com/crimsonlotusld/',
       youtube: 'https://www.youtube.com/@crimsonlotusliondance',
       discord: 'https://discord.com/invite/v7aPxyUg9f',

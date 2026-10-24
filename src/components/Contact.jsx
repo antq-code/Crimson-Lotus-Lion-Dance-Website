@@ -4,15 +4,6 @@ import Glow from './Glow.jsx';
 import Turnstile from './Turnstile.jsx';
 
 const icons = {
-  gmail: (
-    <path
-      fill="#EA4335"
-      d="M2 6.5A1.5 1.5 0 0 1 4.4 5.3L12 11l7.6-5.7A1.5 1.5 0 0 1 22 6.5v11a1.5 1.5 0 0 1-1.5 1.5H18v-8.4l-6 4.5-6-4.5V19H3.5A1.5 1.5 0 0 1 2 17.5v-11Z"
-    />
-  ),
-  email: (
-    <path d="M4 6h16v12H4z M4 7l8 6 8-6" fill="none" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
-  ),
   instagram: (
     <g fill="none" stroke="currentColor" strokeWidth="2">
       <rect x="4" y="4" width="16" height="16" rx="4" />
@@ -56,7 +47,6 @@ export default function Contact() {
   const turnstileRef = useRef(null);
   const emailRef = useRef(null);
   const sending = status.state === 'sending';
-  const gmailUrl = `https://mail.google.com/mail/?view=cm&to=${email}&su=Booking%20inquiry`;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -178,11 +168,6 @@ export default function Contact() {
             <button type="button" className="copy-btn" onClick={copyEmail}>
               {copied ? 'Copied!' : 'Copy'}
             </button>
-            <Glow backgroundColor="#ffffff" borderRadius={10} glowRadius={20} glowIntensity={1.8}>
-              <a className="gmail-link" href={gmailUrl} target="_blank" rel="noreferrer" aria-label="Email us in Gmail (opens in a new tab)">
-                <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">{icons.gmail}</svg>
-              </a>
-            </Glow>
           </div>
           <p className="sr-only" role="status">{copied ? 'Email address copied to clipboard.' : ''}</p>
         </div>
@@ -191,7 +176,7 @@ export default function Contact() {
           {Object.entries(socials).map(([name, href]) => (
             <li key={name}>
               <Glow backgroundColor="#ffffff" borderRadius={10} glowRadius={20} glowIntensity={1.8}>
-                <a href={href} target={name === 'email' ? undefined : '_blank'} rel="noreferrer" aria-label={name}>
+                <a href={href} target="_blank" rel="noreferrer" aria-label={name}>
                   <svg viewBox="0 0 24 24" width="20" height="20">{icons[name]}</svg>
                 </a>
               </Glow>
