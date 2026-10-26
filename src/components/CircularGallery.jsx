@@ -8,6 +8,9 @@ const DEFAULT_FONT_URL = 'https://fonts.googleapis.com/css2?family=Figtree:wght@
 const SEGMENTS_X = 32;
 const SEGMENTS_Y = 24;
 const INTRO_SECONDS = 1.4;
+// Cards laid out (and their images fetched) beyond each screen edge, so the next few
+// photos are ready before they scroll into view without downloading the whole gallery.
+const PRELOAD_AHEAD = 2;
 const WORLD_HEIGHT = 16.57;
 const CLASSES = {
   root: 'circular-gallery',
@@ -20,20 +23,6 @@ const CLASSES = {
   hidden: 'circular-gallery-hidden'
 };
 const STEPS = { ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1 };
-const DEFAULT_ITEMS = [
-  { image: 'https://picsum.photos/seed/1/800/600', text: 'Bridge' },
-  { image: 'https://picsum.photos/seed/2/800/600', text: 'Desk Setup' },
-  { image: 'https://picsum.photos/seed/3/800/600', text: 'Waterfall' },
-  { image: 'https://picsum.photos/seed/4/800/600', text: 'Strawberries' },
-  { image: 'https://picsum.photos/seed/5/800/600', text: 'Deep Diving' },
-  { image: 'https://picsum.photos/seed/16/800/600', text: 'Train Track' },
-  { image: 'https://picsum.photos/seed/17/800/600', text: 'Santorini' },
-  { image: 'https://picsum.photos/seed/8/800/600', text: 'Blurry Lights' },
-  { image: 'https://picsum.photos/seed/9/800/600', text: 'New York' },
-  { image: 'https://picsum.photos/seed/10/800/600', text: 'Good Boy' },
-  { image: 'https://picsum.photos/seed/21/800/600', text: 'Coastline' },
-  { image: 'https://picsum.photos/seed/12/800/600', text: 'Palm Trees' }
-];
 
 const VERTEX = `#version 300 es
 in vec2 aPosition;
@@ -231,7 +220,7 @@ const link = gl => {
   return { program, uniforms };
 };
 
-const CircularGallery = ({
+const GalleryCarousel = ({
   items,
   bend = 3,
   textColor = '#ffffff',
@@ -256,6 +245,7 @@ const CircularGallery = ({
   intro = true,
   onItemClick,
   onActiveChange,
+  ariaLabel = 'Image gallery',
   dpr,
   className = '',
   style,
@@ -270,7 +260,7 @@ const CircularGallery = ({
   const fontRef = useRef(font);
   const [active, setActive] = useState(0);
   const [open, setOpen] = useState(false);
-  const list = Array.isArray(items) && items.length ? items : DEFAULT_ITEMS;
+  const list = Array.isArray(items) ? items : [];
   const settings = {
     items: list,
     bend,
@@ -408,37 +398,117 @@ const CircularGallery = ({
     let lastItems = null;
     let typing = false;
 
-    const textureFor = url => {
-      const existing = textures.get(url);
-      if (existing) return existing;
-      const entry = { texture: null, aspect: 1, ready: 0, loaded: false };
-      textures.set(url, entry);
+    let inflight = 0;
+
+    const loadImage = (url, onLoad, onError) => {
       const image = new Image();
       image.crossOrigin = 'anonymous';
       image.decoding = 'async';
-      image.onload = () => {
-        if (!textures.has(url)) return;
-        const texture = gl.createTexture();
-        gl.bindTexture(gl.TEXTURE_2D, texture);
-        gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
-        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
-        gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
-        gl.generateMipmap(gl.TEXTURE_2D);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-        if (anisotropy) {
-          const max = gl.getParameter(anisotropy.MAX_TEXTURE_MAX_ANISOTROPY_EXT);
-          gl.texParameterf(gl.TEXTURE_2D, anisotropy.TEXTURE_MAX_ANISOTROPY_EXT, Math.min(8, max));
-        }
-        entry.texture = texture;
-        entry.aspect = image.naturalWidth / Math.max(1, image.naturalHeight);
-        entry.loaded = true;
-        wake();
-      };
+      image.onload = () => onLoad(image);
+      if (onError) image.onerror = onError;
       image.src = url;
+    };
+
+    const upload = (entry, image) => {
+      const texture = gl.createTexture();
+      gl.bindTexture(gl.TEXTURE_2D, texture);
+      gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
+      gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
+      gl.generateMipmap(gl.TEXTURE_2D);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+      if (anisotropy) {
+        const max = gl.getParameter(anisotropy.MAX_TEXTURE_MAX_ANISOTROPY_EXT);
+        gl.texParameterf(gl.TEXTURE_2D, anisotropy.TEXTURE_MAX_ANISOTROPY_EXT, Math.min(8, max));
+      }
+      if (entry.texture) gl.deleteTexture(entry.texture);
+      entry.texture = texture;
+      entry.aspect = image.naturalWidth / Math.max(1, image.naturalHeight);
+      entry.loaded = true;
+      wake();
+    };
+
+    // Texture state for an item. Creating it only uploads the tiny inline blur placeholder
+    // (item.placeholder) so cards show something right away; nothing is fetched until
+    // request() is called for cards on screen or a few slots away (see PRELOAD_AHEAD).
+    const textureFor = item => {
+      const url = item.image;
+      const existing = textures.get(url);
+      if (existing) return existing;
+      const known = item.width && item.height ? item.width / item.height : 0;
+      const entry = { texture: null, aspect: known || 1, ready: 0, loaded: false, level: 0, requested: false };
+      textures.set(url, entry);
+      if (item.placeholder) {
+        loadImage(item.placeholder, image => {
+          if (textures.get(url) !== entry || entry.level > 0) return;
+          upload(entry, image);
+          entry.level = 1;
+        });
+      }
       return entry;
+    };
+
+    // Fetch an item's real image: the thumbnail first (fast), then the full size.
+    const request = item => {
+      const url = item.image;
+      const entry = textureFor(item);
+      if (entry.requested) return entry;
+      entry.requested = true;
+      const loadFull = () => {
+        inflight++;
+        loadImage(
+          url,
+          image => {
+            inflight--;
+            if (textures.get(url) !== entry) return wake();
+            upload(entry, image);
+            entry.level = 3;
+          },
+          () => {
+            inflight--;
+            wake();
+          }
+        );
+      };
+      if (item.thumbnail) {
+        loadImage(
+          item.thumbnail,
+          image => {
+            if (textures.get(url) !== entry) return;
+            if (entry.level < 2) {
+              upload(entry, image);
+              entry.level = 2;
+            }
+            loadFull();
+          },
+          loadFull
+        );
+      } else {
+        loadFull();
+      }
+      return entry;
+    };
+
+    // Progressive loading: once the photos near the screen have finished, fetch the rest
+    // two at a time, nearest to the current photo first. Each finished download wakes the
+    // render loop, which calls this again until every photo is loaded.
+    const loadInBackground = () => {
+      if (inflight > 0) return;
+      const list = settingsRef.current.items;
+      const count = list.length;
+      if (!count) return;
+      const center = wrap(state.active, count);
+      let started = 0;
+      for (let step = 1; step <= count && started < 2; step++) {
+        for (const index of [wrap(center + step, count), wrap(center - step, count)]) {
+          if (started >= 2 || textures.get(list[index].image)?.requested) continue;
+          request(list[index]);
+          started++;
+        }
+      }
     };
 
     const prune = list => {
@@ -496,7 +566,7 @@ const CircularGallery = ({
       const margin = Math.max(20, Math.min(view.width, view.height) * 0.06);
       const baseLabel = h * 0.072 * fontScale(fontRef.current);
       const openFrame = item => {
-        const aspect = textureFor(item.image).aspect || w / h;
+        const aspect = textureFor(item).aspect || w / h;
         const titleSpace = item.text && s.showTitles ? captionSize() * 2.4 : 0;
         const captionSpace = titleSpace + (item.description ? 52 : 0);
         const width = Math.min(view.width - margin * 2, (view.height - margin * 2 - captionSpace) * aspect);
@@ -505,14 +575,14 @@ const CircularGallery = ({
       const activeFrame = openFrame(list[wrap(state.active, count)]);
       const spread = Math.max(0, activeFrame.width / 2 - w / 2);
       const activeX = state.active * spacing - scroll;
-      const first = Math.floor((scroll - view.width / 2 - spacing * 2) / spacing);
-      const lastSlot = Math.ceil((scroll + view.width / 2 + spacing * 2) / spacing);
+      const first = Math.floor((scroll - view.width / 2 - spacing * PRELOAD_AHEAD) / spacing);
+      const lastSlot = Math.ceil((scroll + view.width / 2 + spacing * PRELOAD_AHEAD) / spacing);
       const next = [];
       let lead = null;
       for (let slot = first; slot <= lastSlot; slot++) {
         const index = wrap(slot, count);
         const item = list[index];
-        const entry = textureFor(item.image);
+        const entry = request(item);
         const focus = ease(state.focus.get(slot) || 0);
         let x = slot * spacing - scroll;
         x += Math.sign(x - activeX) * state.open * (1 - focus) * spread;
@@ -693,7 +763,6 @@ const CircularGallery = ({
       if (s.items !== lastItems) {
         lastItems = s.items;
         prune(s.items);
-        s.items.forEach(item => textureFor(item.image));
       }
       const idle = now - state.lastInput > 1800;
       const auto =
@@ -756,6 +825,7 @@ const CircularGallery = ({
         s.onActiveChange?.(index);
       }
       const metrics = layout();
+      loadInBackground();
       draw(metrics);
       placeLabels(metrics);
       const moving =
@@ -1000,7 +1070,6 @@ const CircularGallery = ({
     document.addEventListener('keydown', onAnyKey, true);
     document.addEventListener('pointerdown', onAnyPointer, true);
     lastItems = settingsRef.current.items;
-    lastItems.forEach(item => textureFor(item.image));
     resize();
 
     const slotFor = index => {
@@ -1064,10 +1133,15 @@ const CircularGallery = ({
       style={{ color: textColor, '--cg-fade': `${settings.fadeEdges * 100}%`, ...style }}
       role="region"
       aria-roledescription="carousel"
-      aria-label="Image gallery"
+      aria-label={ariaLabel}
       {...rest}
     >
-      <canvas ref={canvasRef} className={CLASSES.canvas} aria-hidden="true" />
+      <canvas
+        ref={canvasRef}
+        className={CLASSES.canvas}
+        role="img"
+        aria-label={`${count} photos on a curved carousel. Use the left and right arrow keys to move between photos, and Enter to open one.`}
+      />
       <div ref={labelsRef} className={CLASSES.labels} aria-hidden="true" />
       <div ref={captionRef} className={CLASSES.caption} aria-hidden={!open}>
         {current?.description && <p className={CLASSES.captionText}>{current.description}</p>}
@@ -1109,6 +1183,124 @@ const CircularGallery = ({
       </div>
     </div>
   );
+};
+
+// Small screens, data-saver mode, and slow connections get the 600px images (lite tier).
+const prefersLite = () => {
+  const connection = navigator.connection;
+  return (
+    window.matchMedia?.('(max-width: 768px)').matches ||
+    Boolean(connection?.saveData) ||
+    /(^|slow-)2g|3g/.test(connection?.effectiveType || '')
+  );
+};
+
+// Reads a gallery manifest ({ photos: [{ src, srcMobile, width, height, placeholder, alt }] }).
+// Returns [] when it's missing or invalid, so the caller can hide the gallery.
+export async function loadGalleryManifest(url) {
+  try {
+    const res = await fetch(url, { cache: 'no-cache' });
+    if (!res.ok) return [];
+    const data = await res.json();
+    const lite = prefersLite();
+    return (Array.isArray(data?.photos) ? data.photos : [])
+      .filter(photo => photo?.src)
+      .map(photo => ({
+        image: lite && photo.srcMobile ? photo.srcMobile : photo.src,
+        placeholder: photo.placeholder,
+        width: photo.width,
+        height: photo.height,
+        alt: photo.alt
+      }));
+  } catch {
+    return [];
+  }
+}
+
+const supportsWebGL2 = () => {
+  try {
+    const gl = document.createElement('canvas').getContext('webgl2');
+    gl?.getExtension('WEBGL_lose_context')?.loseContext();
+    return Boolean(gl);
+  } catch {
+    return false;
+  }
+};
+
+// Without WebGL2: a plain, scrollable row of real <img> elements with the same alt text.
+const GalleryFallback = ({ items, ariaLabel }) => (
+  <div className="circular-gallery-fallback" role="region" aria-label={ariaLabel}>
+    <ul>
+      {items.map((item, index) => (
+        <li key={`${item.image}-${index}`}>
+          <img
+            src={item.image}
+            alt={item.alt || `Photo ${index + 1} of ${items.length}`}
+            width={item.width}
+            height={item.height}
+            loading="lazy"
+            decoding="async"
+            style={item.placeholder ? { backgroundImage: `url(${item.placeholder})` } : undefined}
+          />
+        </li>
+      ))}
+    </ul>
+  </div>
+);
+
+/**
+ * Circular WebGL gallery.
+ * - Pass `items` directly, or `manifestUrl` to load a gallery manifest (e.g. "/gallery.json").
+ * - With a manifest, nothing is fetched or mounted until the gallery is within `mountMargin`
+ *   of the viewport. `onStatus` reports 'loading' | 'ready' | 'empty'.
+ * - Falls back to plain <img> elements when WebGL2 isn't available.
+ */
+const CircularGallery = ({ manifestUrl, items, onStatus, mountMargin = '600px', ...props }) => {
+  const holderRef = useRef(null);
+  const statusRef = useRef(onStatus);
+  statusRef.current = onStatus;
+  const [near, setNear] = useState(!manifestUrl);
+  const [photos, setPhotos] = useState(null);
+  const [webgl] = useState(supportsWebGL2);
+
+  useEffect(() => {
+    if (near) return undefined;
+    const el = holderRef.current;
+    if (!el || !('IntersectionObserver' in window)) {
+      setNear(true);
+      return undefined;
+    }
+    const observer = new IntersectionObserver(
+      entries => {
+        if (entries.some(entry => entry.isIntersecting)) {
+          setNear(true);
+          observer.disconnect();
+        }
+      },
+      { rootMargin: `${mountMargin} 0px` }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [near, mountMargin]);
+
+  useEffect(() => {
+    if (!near || !manifestUrl) return undefined;
+    let cancelled = false;
+    statusRef.current?.('loading');
+    loadGalleryManifest(manifestUrl).then(list => {
+      if (cancelled) return;
+      setPhotos(list);
+      statusRef.current?.(list.length ? 'ready' : 'empty');
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [near, manifestUrl]);
+
+  const list = items ?? photos;
+  if (!list?.length) return <div ref={holderRef} className="circular-gallery-pending" aria-hidden="true" />;
+  if (!webgl) return <GalleryFallback items={list} ariaLabel={props.ariaLabel} />;
+  return <GalleryCarousel items={list} {...props} />;
 };
 
 export default CircularGallery;

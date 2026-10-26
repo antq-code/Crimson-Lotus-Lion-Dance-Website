@@ -112,3 +112,43 @@
   white-space: nowrap;
   border: 0;
 }
+
+/* Space holder until the gallery is near the viewport and its photos have loaded. */
+.circular-gallery-pending {
+  width: 100%;
+  height: 100%;
+}
+
+/* Non-WebGL fallback: a scrollable row of real images. */
+.circular-gallery-fallback {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+}
+
+.circular-gallery-fallback ul {
+  display: flex;
+  gap: 16px;
+  margin: 0;
+  padding: 0 16px;
+  list-style: none;
+  height: 70%;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+}
+
+.circular-gallery-fallback li {
+  flex: 0 0 auto;
+  height: 100%;
+  scroll-snap-align: center;
+}
+
+.circular-gallery-fallback img {
+  display: block;
+  height: 100%;
+  width: auto;
+  object-fit: cover;
+  border-radius: 12px;
+  background-size: cover;
+}

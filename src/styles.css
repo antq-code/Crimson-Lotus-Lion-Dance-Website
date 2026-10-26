@@ -334,6 +334,11 @@ a {
   transition: opacity 0.25s ease-out;
 }
 
+/* No photos yet (no gallery.json): hide the arch, keep the heading and motto. */
+.team-gallery.is-empty {
+  display: none;
+}
+
 .team-gallery.is-outside-arch .circular-gallery {
   cursor: default;
 }
