@@ -3,3 +3,9 @@ dist
 .wrangler
 .dev.vars
 photo-originals
+# Generated at build time by scripts/drive-gallery.mjs (never committed)
+public/gallery
+public/gallery.staging
+public/gallery.json
+.drive-cache
+.drive-listing.json

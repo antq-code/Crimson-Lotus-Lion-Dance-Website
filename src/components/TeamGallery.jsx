@@ -3,17 +3,9 @@ import { site } from '../content.js';
 import CircularGallery from './CircularGallery.jsx';
 import GlowText from './GlowText.jsx';
 
-const items = site.team.photos.map((p) => ({
-  image: p.src,
-  text: p.title,
-  description: p.description,
-  alt: p.alt,
-}));
-
 // Gallery settings shared with the arch math below.
 const BEND = 3;
-const FONT_PX = 30;
-// Space between the band's edges and the photos (top) / captions (bottom).
+// Space between the band's edges and the photos.
 const PAD_TOP = 28;
 const PAD_BOTTOM = 22;
 // Border glow (same idea as BorderGlow): lights up the arch edge near the cursor.
@@ -21,7 +13,7 @@ const GLOW_RANGE = 90; // px from an edge where the glow starts
 const GLOW_RADIUS = 260; // px radius of the lit stretch of edge
 const RAIL_WIDTH = 11; // px thickness of the gold rails (was a 1px line)
 
-// Mirrors CircularGallery's layout (measure + arcOf, itemSize 1, itemAspect 0.78):
+// Mirrors CircularGallery's layout (measure + arcOf, itemSize 1, itemAspect 0.78, no captions):
 // cards sit on a circle of radius R centred below the gallery, so the band is the
 // ring between two circles sharing that centre.
 function archFor(width, height) {
@@ -29,12 +21,11 @@ function archFor(width, height) {
   const half = Math.max(width, height * 1.9) / 2;
   const R = (half * half + depth * depth) / (2 * depth);
   const cardH = 0.6 * height * Math.min(1, (width * 0.82) / (0.6 * height * 0.78));
-  const label = cardH * 0.072 * (FONT_PX / 30);
   return {
     cx: width / 2,
     cy: height / 2 + R,
     outer: R + cardH / 2 + PAD_TOP,
-    inner: R - (cardH / 2 + label * 1.7 + PAD_BOTTOM),
+    inner: R - (cardH / 2 + PAD_BOTTOM),
     width,
     depth,
   };
@@ -64,11 +55,15 @@ export default function TeamGallery() {
   const glowRef = useRef(null);
   const spotRef = useRef(null);
   const [arch, setArch] = useState(null);
+  // 'loading' | 'ready' | 'empty' (no gallery.json yet, e.g. local dev before `npm run gallery`).
+  const [status, setStatus] = useState('loading');
 
   useEffect(() => {
     const wrap = wrapRef.current;
 
     const resize = () => {
+      // Hidden (no photos) or not laid out yet: there's no arch to draw.
+      if (!wrap.clientWidth || !wrap.clientHeight) return;
       archRef.current = archFor(wrap.clientWidth, wrap.clientHeight);
       setArch(archRef.current);
     };
@@ -78,6 +73,7 @@ export default function TeamGallery() {
 
     const inArch = (event) => {
       const a = archRef.current;
+      if (!a) return true;
       const rect = wrap.getBoundingClientRect();
       const d = Math.hypot(event.clientX - rect.left - a.cx, event.clientY - rect.top - a.cy);
       return d >= a.inner && d <= a.outer;
@@ -134,7 +130,7 @@ export default function TeamGallery() {
     <section id="team" className="team" ref={sectionRef}>
       <h2 className="section-title">{site.team.title}</h2>
       <GlowText className="team-motto">{site.motto}</GlowText>
-      <div className="team-gallery" ref={wrapRef}>
+      <div className={`team-gallery${status === 'empty' ? ' is-empty' : ''}`} ref={wrapRef}>
         {arch && (() => {
           const path = bandPath(arch);
           const rails = [arcPath(arch, arch.outer), arcPath(arch, arch.inner)];
@@ -187,17 +183,20 @@ export default function TeamGallery() {
             </svg>
           );
         })()}
+        {/* Photos come from Google Drive via the build pipeline (scripts/drive-gallery.mjs),
+            which writes /gallery.json. Mounted only when the section nears the viewport. */}
         <CircularGallery
-          items={items}
+          manifestUrl="/gallery.json"
+          onStatus={setStatus}
+          ariaLabel="Photo gallery of Crimson Lotus performances"
           bend={BEND}
           textColor="#ffffff"
           borderRadius={0.05}
           scrollEase={0.05}
           snap={false}
+          showTitles={false}
           borderColor="#c9a227"
           borderWidth={3}
-          font={`400 ${FONT_PX}px Cinzel`}
-          fontUrl="https://fonts.googleapis.com/css2?family=Cinzel:wght@400&display=swap"
         />
       </div>
     </section>

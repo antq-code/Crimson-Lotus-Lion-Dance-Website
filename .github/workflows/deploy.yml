@@ -12,6 +12,12 @@ on:
     paths-ignore:
       - 'worker/**'
       - '.github/workflows/deploy-worker.yml'
+  # Every 30 minutes: picks up photos added to / changed in / removed from the Google Drive
+  # gallery folder. Only builds and deploys when the folder actually changed.
+  schedule:
+    - cron: '*/30 * * * *'
+  # Manual run: Actions tab → Build and Deploy → Run workflow.
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -22,7 +28,39 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  # Cheap check for scheduled runs: compare the Drive folder with the live gallery.json.
+  # Every other trigger always builds.
+  check:
+    runs-on: ubuntu-latest
+    outputs:
+      changed: ${{ steps.check.outputs.changed }}
+    steps:
+      - uses: actions/checkout@v4
+        if: github.event_name == 'schedule'
+        with:
+          sparse-checkout: scripts
+
+      - uses: actions/setup-node@v4
+        if: github.event_name == 'schedule'
+        with:
+          node-version: 22
+
+      - name: Check Google Drive for gallery changes
+        id: check
+        run: |
+          if [ "$EVENT" != "schedule" ]; then
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          else
+            node scripts/drive-gallery.mjs check
+          fi
+        env:
+          EVENT: ${{ github.event_name }}
+          DRIVE_API_KEY: ${{ secrets.DRIVE_API_KEY }}
+          DRIVE_FOLDER_ID: ${{ secrets.DRIVE_FOLDER_ID }}
+
   build:
+    needs: check
+    if: needs.check.outputs.changed == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -35,6 +73,34 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      # Its fingerprint (all Drive file ids + md5 checksums) keys the photo cache below.
+      - name: List Google Drive gallery folder
+        id: drive
+        run: node scripts/drive-gallery.mjs list
+        continue-on-error: true
+        env:
+          DRIVE_API_KEY: ${{ secrets.DRIVE_API_KEY }}
+          DRIVE_FOLDER_ID: ${{ secrets.DRIVE_FOLDER_ID }}
+
+      # Processed photos, stored per Drive file id + md5Checksum, so unchanged photos
+      # aren't downloaded and re-processed on every run.
+      - name: Restore processed gallery photos
+        uses: actions/cache@v4
+        with:
+          path: .drive-cache
+          key: drive-gallery-v1-${{ steps.drive.outputs.fingerprint || format('none-{0}', github.run_id) }}
+          restore-keys: drive-gallery-v1-
+
+      # Writes public/gallery/ and public/gallery.json, plus a job summary. Never fails the
+      # deploy: if Drive is unavailable it keeps the currently deployed gallery.
+      - name: Build gallery from Google Drive
+        run: node scripts/drive-gallery.mjs build
+        continue-on-error: true
+        timeout-minutes: 20
+        env:
+          DRIVE_API_KEY: ${{ secrets.DRIVE_API_KEY }}
+          DRIVE_FOLDER_ID: ${{ secrets.DRIVE_FOLDER_ID }}
+
       # These run automatically once "lint" / "test" scripts are added to package.json.
       - name: Lint
         run: npm run lint --if-present
@@ -46,18 +112,18 @@ jobs:
         run: npm run build
 
       - name: Configure Pages
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
         uses: actions/configure-pages@v5
 
       - name: Upload Pages artifact
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
         uses: actions/upload-pages-artifact@v3
         with:
           path: dist
 
   deploy:
     needs: build
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     permissions:
       pages: write

@@ -18,28 +18,14 @@ export const site = {
   mission: {
     title: 'Mission Statement',
     text:
-      'Founded in 2024 by Texas A&M student lion dancers who wanted to keep this tradition thriving in College Station. We perform at festivals, grand openings, and community events across Texas, from our second home in College Station to Houston, Dallas, and Austin, bringing blessings of good fortune and prosperity. On campus, we offer workshops that open the art to students of every background and experience level, passing on the rhythm, discipline, and spirit of lion dance to the next generation. We are a team built on culture, respect for tradition, and the joy of bringing a crowd to its feet.',
+      'Crimson Lotus Lion Dance Team is a lion dance team based in College Station, Texas, dedicated to preserving and sharing the art and culture of lion dance with the College Station and Bryan communities. Starting as a group of friends who wanted to continue practicing lion dance while away from home, Crimson Lotus has grown into a team of hardworking members with diverse levels of lion dance experience. Here at Crimson Lotus we want to provide a fun and educational environment to our members and clients throughout Texas!',
     image: '/images/missionIMG.jpg',
     imageAlt: 'Lions performing on stage',
   },
 
   team: {
     title: 'Our Team',
-    // Add as many photos as you like; the gallery loops through them.
-    // title shows under each photo; description shows when a photo is clicked open.
-    photos: [
-      { src: '/images/teamIMG.jpg', title: 'The Team', description: '', alt: 'Team group photo' },
-      { src: '/images/teamIMG2.jpg', title: 'Purple Lion', description: '', alt: 'Dancer holding a purple lion head' },
-      { src: '/images/teamIMG3.jpg', title: 'Warm-Ups', description: '', alt: 'Team members warming up' },
-      { src: '/images/gallery/lion-closeup.jpg', title: 'Up Close', description: '', alt: 'Close-up of a red and white lion head with gold trim' },
-      { src: '/images/gallery/meet-the-lion.jpg', title: 'Meet the Lion', description: '', alt: 'Team member in a jersey standing beside a white and pink lion' },
-      { src: '/images/gallery/uniform-reveal-steps.jpg', title: 'Uniform Reveal', description: '', alt: 'Team posing on the steps of a columned building, holding red banners' },
-      { src: '/images/gallery/uniform-reveal-doorway.jpg', title: 'Standing Tall', description: '', alt: 'Red and black lion rearing up in a doorway between stone columns' },
-      { src: '/images/gallery/uniform-reveal-red-lion.jpg', title: 'Red Lion', description: '', alt: 'Red lion performing on stone steps in front of columns' },
-      { src: '/images/gallery/otaku-festival-huddle.jpg', title: 'Team Huddle', description: '', alt: 'Team members bumping fists in a huddle before a performance' },
-      { src: '/images/gallery/otaku-festival-performance.jpg', title: 'Otaku Food Festival', description: '', alt: 'Three lions performing inside a shopping mall' },
-      { src: '/images/gallery/otaku-festival-group.jpg', title: 'Festival Crew', description: '', alt: 'Team group photo with lions inside a shopping mall' },
-    ],
+    // Gallery photos come from the team's Google Drive folder (see docs/photo-gallery.md).
   },
 
   contact: {
