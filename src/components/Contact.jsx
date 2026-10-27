@@ -41,7 +41,7 @@ const today = () => {
 const GENERIC_ERROR = 'Sorry, we couldn’t send your message. Please try again, or email us using the address below.';
 
 export default function Contact() {
-  const { title, backgroundImage, email, api, turnstileSiteKey, eventTypes, socials, links, easterEgg } = site.contact;
+  const { title, backgroundImage, email, api, turnstileSiteKey, eventTypes, socials, easterEgg } = site.contact;
   const sectionRef = useRef(null);
   const [status, setStatus] = useState({ state: 'idle', message: '' });
   const [token, setToken] = useState('');
@@ -189,15 +189,6 @@ export default function Contact() {
             </li>
           ))}
         </ul>
-        <div className="contact-links">
-          {links.map((link) => (
-            <Glow key={link.href} className="glow-btn" glowIntensity={1.8}>
-              <a href={link.href} target="_blank" rel="noreferrer" className="outline-btn">
-                {link.label}
-              </a>
-            </Glow>
-          ))}
-        </div>
       </div>
       {easterEgg && <ContactEasterEgg sectionRef={sectionRef} egg={easterEgg} />}
     </section>

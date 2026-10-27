@@ -11,6 +11,7 @@ export const site = {
 
   nav: [
     { label: 'Our Team', href: '#team' },
+    { label: 'Membership', href: 'https://docs.google.com/forms/d/e/1FAIpQLSeJots9PxmMkF-wnCNTq7l4KBvW2SoWqsJXZ5MY4cTQoT7rZQ/viewform' },
     { label: 'Merch', href: 'https://crimson-lotus-lion-dance.printify.me/' },
     { label: 'Contact Us', href: '#contact' },
   ],
@@ -62,11 +63,5 @@ export const site = {
       youtube: 'https://www.youtube.com/@crimsonlotusliondance',
       discord: 'https://discord.com/invite/v7aPxyUg9f',
     },
-    links: [
-      {
-        label: 'Workshop Consent Form',
-        href: 'https://docs.google.com/forms/d/e/1FAIpQLSeDTk7l5CerUBPddx5nPse2P53PWwEh4IjhQwaY0khQzKSGJQ/viewform',
-      },
-    ],
   },
 };

@@ -520,8 +520,7 @@ a {
   box-shadow: 0 0 0 3px rgba(201, 162, 39, 0.35);
 }
 
-.submit-btn,
-.outline-btn {
+.submit-btn {
   padding: 12px 32px;
   border: 0;
   border-radius: 7px;
@@ -534,8 +533,7 @@ a {
   transition: background 0.2s, color 0.2s;
 }
 
-.submit-btn:hover,
-.outline-btn:hover {
+.submit-btn:hover {
   /* A light tint only; the BorderGlow sweep is the main hover effect. */
   background: rgba(201, 162, 39, 0.14);
   color: #fff3c4;
@@ -638,8 +636,7 @@ a {
 
 .contact-form :focus-visible,
 .contact-fallback :focus-visible,
-.socials a:focus-visible,
-.outline-btn:focus-visible {
+.socials a:focus-visible {
   outline: 2px solid var(--gold-light);
   outline-offset: 3px;
 }
@@ -680,18 +677,6 @@ a {
   background: var(--gold-light);
 }
 
-.outline-btn {
-  display: inline-block;
-  text-decoration: none;
-}
-
-.contact-links {
-  width: fit-content;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 16px;
-  margin: 28px 0 0 40px;
-}
 
 /* ---------- Border glow ---------- */
 /* Limit the colored sweep to the 1px border so see-through fills (glass navbar,
@@ -795,8 +780,7 @@ a {
 
   .contact-form,
   .contact-fallback,
-  .socials,
-  .contact-links {
+  .socials {
     margin-left: 0;
   }
 }
