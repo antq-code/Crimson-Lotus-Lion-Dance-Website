@@ -31,6 +31,16 @@ export const site = {
   contact: {
     title: 'Reach out to us for performances!',
     backgroundImage: '/images/contactIMG.jpg',
+    // Easter egg: clicking the purple "LEVEL 7" parking sign in the background photo dims
+    // the site and plays this.
+    easterEgg: {
+      image: '/images/surprise.webp',
+      alt: 'A team member dancing at night next to a Texas A&M parking sign',
+      // Pixel size of backgroundImage, used to keep the clickable area on the sign at any screen size.
+      backgroundSize: [5797, 3865],
+      // Clickable area, as [x%, y%] points across/down backgroundImage: the LEVEL 7 sign.
+      outline: [[63.6, 47.8], [65.3, 47.8], [65.3, 50.6], [63.6, 50.6]],
+    },
     // Shown next to the form as a fallback. The form itself sends through the Cloudflare
     // Worker in /worker; its destination address is set in worker/wrangler.toml.
     email: 'crimsonlotuslions@gmail.com',

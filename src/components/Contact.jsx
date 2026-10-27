@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react';
 import { site } from '../content.js';
 import Glow from './Glow.jsx';
+import ContactEasterEgg from './ContactEasterEgg.jsx';
 import Turnstile from './Turnstile.jsx';
 
 const icons = {
@@ -40,7 +41,8 @@ const today = () => {
 const GENERIC_ERROR = 'Sorry, we couldn’t send your message. Please try again, or email us using the address below.';
 
 export default function Contact() {
-  const { title, backgroundImage, email, api, turnstileSiteKey, eventTypes, socials, links } = site.contact;
+  const { title, backgroundImage, email, api, turnstileSiteKey, eventTypes, socials, links, easterEgg } = site.contact;
+  const sectionRef = useRef(null);
   const [status, setStatus] = useState({ state: 'idle', message: '' });
   const [token, setToken] = useState('');
   const [copied, setCopied] = useState(false);
@@ -98,7 +100,7 @@ export default function Contact() {
   };
 
   return (
-    <section id="contact" className="contact">
+    <section id="contact" className="contact" ref={sectionRef}>
       <div
         className="contact-bg"
         aria-hidden="true"
@@ -197,6 +199,7 @@ export default function Contact() {
           ))}
         </div>
       </div>
+      {easterEgg && <ContactEasterEgg sectionRef={sectionRef} egg={easterEgg} />}
     </section>
   );
 }
