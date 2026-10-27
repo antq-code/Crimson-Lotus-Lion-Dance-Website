@@ -755,23 +755,56 @@ a {
 
   .mission {
     grid-template-columns: 1fr;
-    padding-bottom: 64px;
+    gap: 48px;
+    padding-bottom: 96px;
   }
 
   .mission h2 {
-    margin-bottom: 20px;
+    margin-bottom: 28px;
   }
 
+  /* Cinzel is all small caps, so it needs extra room to read comfortably on a phone. */
   .mission p {
-    font-size: 1.1rem;
+    font-size: 1.05rem;
+    line-height: 1.75;
+    letter-spacing: 0.02em;
+  }
+
+  .team-motto {
+    margin-bottom: 24px;
+    line-height: 1.5;
   }
 
   .team-gallery {
     height: 440px;
   }
 
+  /* Phones: the photo becomes its own band above the form, zoomed in on the dancer and the
+     LEVEL 7 sign (so the easter egg can be tapped), instead of a backdrop hidden by the form. */
+  .contact {
+    padding-top: 40px;
+  }
+
+  .contact-bg {
+    position: relative;
+    inset: auto;
+    height: min(150vw, 720px);
+    background-position: 54% center;
+  }
+
+  .contact-inner {
+    /* Overlap the photo's faded bottom edge. */
+    margin-top: -64px;
+  }
+
   .contact .section-title {
-    margin-bottom: 48px;
+    margin-bottom: 40px;
+    padding-inline: 8px;
+    line-height: 1.3;
+  }
+
+  .contact-form {
+    gap: 26px;
   }
 
   .form-row {

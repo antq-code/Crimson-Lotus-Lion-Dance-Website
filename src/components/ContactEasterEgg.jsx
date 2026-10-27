@@ -3,7 +3,10 @@ import { createPortal } from 'react-dom';
 
 // Hidden easter egg: an invisible button over a spot in the contact section's background
 // photo (the LEVEL 7 sign; see `outline` in content.js). Clicking it dims the site and plays an animation (config in content.js).
-export default function ContactEasterEgg({ sectionRef, egg }) {
+// Smallest clickable area, in px, so the spot stays easy to tap on phones.
+const MIN_TAP = 44;
+
+export default function ContactEasterEgg({ sectionRef, photoRef, egg }) {
   const buttonRef = useRef(null);
   const closeRef = useRef(null);
   const blobRef = useRef(null);
@@ -20,29 +23,38 @@ export default function ContactEasterEgg({ sectionRef, egg }) {
     .map(([x, y]) => `${(((x - bounds.x) / bounds.w) * 100).toFixed(2)}% ${(((y - bounds.y) / bounds.h) * 100).toFixed(2)}%`)
     .join(', ')})`;
 
-  // Keep the button on its spot in the photo: mirror the photo's `background-size: cover` and
-  // `background-position: center` for the section's current size.
+  // Keep the button on its spot in the photo: mirror the photo element's `background-size: cover`
+  // and `background-position` (a % value; phones use a different one) at its current size and place.
   useEffect(() => {
     const section = sectionRef.current;
+    const photo = photoRef.current;
     const [imageW, imageH] = egg.backgroundSize;
     const place = () => {
-      const width = section.clientWidth;
-      const height = section.clientHeight;
+      const width = photo.offsetWidth;
+      const height = photo.offsetHeight;
       if (!width || !height) return;
+      const style = getComputedStyle(photo);
+      const posX = parseFloat(style.backgroundPositionX.split(',').pop()) / 100;
+      const posY = parseFloat(style.backgroundPositionY.split(',').pop()) / 100;
       const scale = Math.max(width / imageW, height / imageH);
       const shownW = imageW * scale;
       const shownH = imageH * scale;
-      const offsetX = (width - shownW) / 2;
-      const offsetY = (height - shownH) / 2;
-      setBox({
+      const offsetX = photo.offsetLeft + (width - shownW) * (Number.isNaN(posX) ? 0.5 : posX);
+      const offsetY = photo.offsetTop + (height - shownH) * (Number.isNaN(posY) ? 0.5 : posY);
+      const area = {
         left: offsetX + (bounds.x / 100) * shownW,
         top: offsetY + (bounds.y / 100) * shownH,
         width: (bounds.w / 100) * shownW,
         height: (bounds.h / 100) * shownH,
-      });
+      };
+      // On small screens the spot can shrink below a comfortable tap size: grow it around its centre.
+      const grow = Math.max(0, MIN_TAP - area.width) / 2;
+      const growY = Math.max(0, MIN_TAP - area.height) / 2;
+      setBox({ left: area.left - grow, top: area.top - growY, width: area.width + grow * 2, height: area.height + growY * 2, grown: grow > 0 || growY > 0 });
     };
     const observer = new ResizeObserver(place);
     observer.observe(section);
+    observer.observe(photo);
     place();
     return () => observer.disconnect();
     // The outline and photo size are fixed config, so this only needs to run once.
@@ -107,7 +119,14 @@ export default function ContactEasterEgg({ sectionRef, egg }) {
           ref={buttonRef}
           type="button"
           className="contact-egg"
-          style={{ ...box, clipPath, WebkitClipPath: clipPath }}
+          style={{
+            left: box.left,
+            top: box.top,
+            width: box.width,
+            height: box.height,
+            // The outline only matters at full size; a grown tap area is a plain box.
+            ...(!box.grown && { clipPath, WebkitClipPath: clipPath }),
+          }}
           aria-label="Surprise! Play a hidden animation"
           onClick={show}
           onPointerEnter={preload}

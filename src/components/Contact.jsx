@@ -43,6 +43,7 @@ const GENERIC_ERROR = 'Sorry, we couldn’t send your message. Please try again,
 export default function Contact() {
   const { title, backgroundImage, email, api, turnstileSiteKey, eventTypes, socials, easterEgg } = site.contact;
   const sectionRef = useRef(null);
+  const bgRef = useRef(null);
   const [status, setStatus] = useState({ state: 'idle', message: '' });
   const [token, setToken] = useState('');
   const [copied, setCopied] = useState(false);
@@ -102,6 +103,7 @@ export default function Contact() {
   return (
     <section id="contact" className="contact" ref={sectionRef}>
       <div
+        ref={bgRef}
         className="contact-bg"
         aria-hidden="true"
         style={{ backgroundImage: `linear-gradient(rgba(9, 6, 6, 0.68), rgba(9, 6, 6, 0.68)), url(${backgroundImage})` }}
@@ -190,7 +192,7 @@ export default function Contact() {
           ))}
         </ul>
       </div>
-      {easterEgg && <ContactEasterEgg sectionRef={sectionRef} egg={easterEgg} />}
+      {easterEgg && <ContactEasterEgg sectionRef={sectionRef} photoRef={bgRef} egg={easterEgg} />}
     </section>
   );
 }
