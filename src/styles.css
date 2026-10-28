@@ -348,6 +348,205 @@ a {
   cursor: default;
 }
 
+/* ---------- Officer contacts ---------- */
+.officers {
+  padding-bottom: 100px;
+}
+
+/* Same look as the team arch: see-through logo reds between two gold rails, like a
+   hanging scroll. The site's gradient background shows around it. */
+.officers-band {
+  position: relative;
+  /* Keeps the fill and rails (z-index -1) behind the cards but above the page background. */
+  isolation: isolate;
+  padding: 64px 0 72px;
+}
+
+/* Arch reds, brightest at the top centre, at the arch's 60% opacity. */
+.officers-band::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: radial-gradient(ellipse 75% 120% at 50% 25%, #ff3b3b, #ea2b2f 35%, var(--crimson) 65%, var(--crimson-dark) 85%, #7a0808);
+  opacity: 0.6;
+}
+
+/* Gold rails: brushed gold across the thickness with a light line through the middle. */
+.officers-band::after {
+  content: '';
+  position: absolute;
+  inset: -5px 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    linear-gradient(transparent 4.5px, rgba(243, 215, 122, 0.7) 4.5px 6.5px, transparent 6.5px) top / 100% 11px no-repeat,
+    linear-gradient(var(--gold-dark), var(--gold), var(--gold-dark)) top / 100% 11px no-repeat,
+    linear-gradient(transparent 4.5px, rgba(243, 215, 122, 0.7) 4.5px 6.5px, transparent 6.5px) bottom / 100% 11px no-repeat,
+    linear-gradient(var(--gold-dark), var(--gold), var(--gold-dark)) bottom / 100% 11px no-repeat;
+}
+
+.officers-list {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: clamp(20px, 4vw, 56px);
+  margin-block: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.officer {
+  display: grid;
+  gap: 20px;
+  align-content: start;
+}
+
+.officer-frame {
+  --mx: -9999px;
+  --my: -9999px;
+  --glow: 0;
+  position: relative;
+}
+
+.officer-photo {
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  object-fit: cover;
+  border: 3px solid var(--gold);
+  border-radius: var(--radius);
+  /* Also shows while a photo is loading. */
+  background: linear-gradient(160deg, #2a2420, #3b2b2b);
+  box-shadow: 0 0 18px rgba(201, 162, 39, 0.25);
+}
+
+/* Hover glow, like the arch rails: a bright border plus a soft gold blur, lit only near the
+   cursor. The outer box is larger than the photo so the blur isn't cut off by the mask. */
+.officer-glow {
+  position: absolute;
+  inset: -24px;
+  pointer-events: none;
+  opacity: var(--glow);
+  -webkit-mask-image: radial-gradient(circle 160px at calc(var(--mx) + 24px) calc(var(--my) + 24px), #000 0%, rgba(0, 0, 0, 0.55) 45%, transparent 100%);
+  mask-image: radial-gradient(circle 160px at calc(var(--mx) + 24px) calc(var(--my) + 24px), #000 0%, rgba(0, 0, 0, 0.55) 45%, transparent 100%);
+  transition: opacity 0.25s ease-out;
+}
+
+.officer-glow-ring {
+  position: absolute;
+  inset: 24px;
+  border: 3px solid #fff3c4;
+  border-radius: var(--radius);
+  box-shadow:
+    0 0 12px var(--gold-light),
+    0 0 24px rgba(201, 162, 39, 0.75),
+    inset 0 0 12px rgba(243, 215, 122, 0.5);
+}
+
+/* Photo with a second photo (content.js `altPhoto`): click to flash the border and crossfade. */
+.officer-swap {
+  position: relative;
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius);
+  background: none;
+  cursor: pointer;
+}
+
+.officer-swap:focus-visible {
+  outline: 2px solid var(--gold-light);
+  outline-offset: 4px;
+}
+
+.officer-photo-alt {
+  position: absolute;
+  inset: 0;
+  height: 100%;
+  opacity: 0;
+  transition: opacity 0.7s ease 0.12s;
+}
+
+.officer-swap.is-alt .officer-photo-alt {
+  opacity: 1;
+}
+
+.officer-flash {
+  position: absolute;
+  inset: 0;
+  border: 3px solid #fff3c4;
+  border-radius: var(--radius);
+  box-shadow:
+    0 0 22px 6px var(--gold-light),
+    0 0 60px rgba(201, 162, 39, 0.8),
+    inset 0 0 50px rgba(243, 215, 122, 0.75);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.officer-swap.is-flashing .officer-flash {
+  animation: officer-flash 0.9s ease-out;
+}
+
+/* Only fades a glow in and out (nothing moves), so it also plays with reduced motion on. */
+@keyframes officer-flash {
+  25% {
+    opacity: 1;
+  }
+}
+
+.officer-photo-empty {
+  display: grid;
+  place-items: center;
+  color: var(--gold-light);
+  font-size: clamp(1.6rem, 3vw, 2.6rem);
+  letter-spacing: 0.08em;
+}
+
+/* Dark box keeps the text readable on the lighter bottom of the band. */
+.officer-info {
+  padding: 16px 12px 18px;
+  border-radius: 10px;
+  background: rgba(9, 6, 6, 0.6);
+  text-align: center;
+}
+
+.officer-info p {
+  margin: 0;
+}
+
+.officer-name {
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: var(--gold-light);
+}
+
+.officer-role,
+.officer-language {
+  margin-top: 4px;
+  font-size: 0.95rem;
+  color: var(--muted);
+}
+
+.officer-phone {
+  display: inline-block;
+  margin-top: 14px;
+  font-family: system-ui, sans-serif;
+  font-size: 1rem;
+  letter-spacing: 0.02em;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.officer-phone:hover {
+  color: var(--gold-light);
+}
+
+.officer-phone:focus-visible {
+  outline: 2px solid var(--gold-light);
+  outline-offset: 3px;
+}
+
 /* ---------- Contact ---------- */
 .contact {
   position: relative;
@@ -658,7 +857,8 @@ a {
   display: flex;
   gap: 16px;
   list-style: none;
-  margin: 64px 0 0 40px;
+  /* Centred in the contact section. */
+  margin: 64px auto 0;
   padding: 0;
 }
 
@@ -779,6 +979,32 @@ a {
     height: 440px;
   }
 
+  .officers-band {
+    padding: 36px 0 40px;
+  }
+
+  .officers-list {
+    grid-template-columns: repeat(2, 1fr);
+    row-gap: 36px;
+  }
+
+  .officer {
+    gap: 14px;
+  }
+
+  .officer-info {
+    padding: 14px 8px 16px;
+  }
+
+  .officer-name {
+    font-size: 1.05rem;
+  }
+
+  .officer-role,
+  .officer-language {
+    font-size: 0.85rem;
+  }
+
   /* Phones: the photo becomes its own band above the form, zoomed in on the dancer and the
      LEVEL 7 sign (so the easter egg can be tapped), instead of a backdrop hidden by the form. */
   .contact {
@@ -812,8 +1038,7 @@ a {
   }
 
   .contact-form,
-  .contact-fallback,
-  .socials {
+  .contact-fallback {
     margin-left: 0;
   }
 }

@@ -13,7 +13,7 @@ export const site = {
     { label: 'Our Team', href: '#team' },
     { label: 'Membership', href: 'https://docs.google.com/forms/d/e/1FAIpQLSeJots9PxmMkF-wnCNTq7l4KBvW2SoWqsJXZ5MY4cTQoT7rZQ/viewform' },
     { label: 'Merch', href: 'https://crimson-lotus-lion-dance.printify.me/' },
-    { label: 'Contact Us', href: '#contact' },
+    { label: 'Contact Us', href: '#officers' },
   ],
 
   mission: {
@@ -27,6 +27,37 @@ export const site = {
   team: {
     title: 'Our Team',
     // Gallery photos come from the team's Google Drive folder (see docs/photo-gallery.md).
+  },
+
+  officers: {
+    title: 'Officer Contacts',
+    // Photos: put each officer's photo (portrait, about 3:4) in /public/images/officers.
+    // Until a photo is there, the card shows the officer's initials. `language` is optional.
+    // `altPhoto` (optional): clicking the photo makes it glow and fade into this one, and back.
+    people: [
+      { name: 'Evan Cao', role: 'Team Lead', phone: '(713)-499-0859', photo: '/images/officers/evan-cao.webp' },
+      {
+        name: 'Star Phan',
+        role: 'Team Officer',
+        phone: '(281)-636-3731',
+        photo: '/images/officers/star-phan.webp',
+        altPhoto: '/images/officers/star-loopy.webp',
+      },
+      {
+        name: 'An Le',
+        role: 'Team Officer',
+        language: 'Vietnamese',
+        phone: '(832)-909-2464',
+        photo: '/images/officers/an-le.webp',
+      },
+      {
+        name: 'Keiko Cheung',
+        role: 'Team Officer',
+        language: 'Mandarin',
+        phone: '(281)-786-0999',
+        photo: '/images/officers/keiko-cheung.webp',
+      },
+    ],
   },
 
   contact: {
