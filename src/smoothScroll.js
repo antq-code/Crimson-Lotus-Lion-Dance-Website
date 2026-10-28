@@ -1,10 +1,15 @@
+import { sectionsReady } from './lazyLoad.js';
+
 const easeInOutCubic = (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
 
 let frame;
 
 // Gently scrolls to the element matching `hash` (e.g. '#team'),
 // stopping just below the fixed navbar.
-export function smoothScrollTo(hash) {
+export async function smoothScrollTo(hash) {
+  // Below-the-fold sections may not be on the page yet; render them first so the target
+  // exists and nothing above it changes height mid-scroll.
+  if (hash !== '#top') await sectionsReady();
   const target = hash === '#top' ? document.body : document.querySelector(hash);
   if (!target) return;
 

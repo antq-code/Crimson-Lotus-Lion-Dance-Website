@@ -1,5 +1,6 @@
-import { useRef, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { site } from '../content.js';
+import { useNear } from '../lazyLoad.js';
 import Glow from './Glow.jsx';
 import ContactEasterEgg from './ContactEasterEgg.jsx';
 import Turnstile from './Turnstile.jsx';
@@ -38,12 +39,31 @@ const today = () => {
   return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
 };
 
+// Smallest photo in `srcSet` ('url 1280w, ...') that covers an element of this size on this
+// screen, given the photo's width/height `ratio` and CSS `background-size: cover`.
+function pickBackground(srcSet, el, ratio) {
+  const options = srcSet
+    .split(',')
+    .map((entry) => entry.trim().split(/\s+/))
+    .map(([url, width]) => ({ url, width: parseInt(width, 10) }))
+    .sort((a, b) => a.width - b.width);
+  const needed = Math.max(el.offsetWidth, el.offsetHeight * ratio) * (window.devicePixelRatio || 1);
+  return (options.find((option) => option.width >= needed) || options[options.length - 1]).url;
+}
+
 const GENERIC_ERROR = 'Sorry, we couldn’t send your message. Please try again, or email us using the address below.';
 
 export default function Contact() {
-  const { title, backgroundImage, email, api, turnstileSiteKey, eventTypes, socials, easterEgg } = site.contact;
+  const { title, backgroundSrcSet, email, api, turnstileSiteKey, eventTypes, socials, easterEgg } = site.contact;
   const sectionRef = useRef(null);
   const bgRef = useRef(null);
+  // The background photo loads only once the section is about a screen away.
+  const bgNear = useNear(bgRef);
+  const [imageW, imageH] = easterEgg?.backgroundSize ?? [3, 2];
+  const background = useMemo(
+    () => (bgNear ? pickBackground(backgroundSrcSet, bgRef.current, imageW / imageH) : null),
+    [bgNear, backgroundSrcSet, imageW, imageH]
+  );
   const [status, setStatus] = useState({ state: 'idle', message: '' });
   const [token, setToken] = useState('');
   const [copied, setCopied] = useState(false);
@@ -106,7 +126,9 @@ export default function Contact() {
         ref={bgRef}
         className="contact-bg"
         aria-hidden="true"
-        style={{ backgroundImage: `linear-gradient(rgba(9, 6, 6, 0.68), rgba(9, 6, 6, 0.68)), url(${backgroundImage})` }}
+        style={{
+          backgroundImage: `linear-gradient(rgba(9, 6, 6, 0.68), rgba(9, 6, 6, 0.68))${background ? `, url(${background})` : ''}`,
+        }}
       />
       <div className="contact-inner container">
         <h2 className="section-title">{title}</h2>

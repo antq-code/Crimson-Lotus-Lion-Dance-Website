@@ -7,7 +7,8 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "gallery": "node scripts/drive-gallery.mjs build"
+    "gallery": "node scripts/drive-gallery.mjs build",
+    "images": "node scripts/optimize-images.mjs"
   },
   "dependencies": {
     "react": "^18.3.1",

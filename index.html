@@ -8,13 +8,28 @@
       name="description"
       content="Crimson Lotus is the lion dance team of College Station, Texas. Book lion dance performances for Lunar New Year, weddings, grand openings, and community events."
     />
-    <link rel="icon" href="/images/Crimson_Lotus_Logo_HD.svg" type="image/svg+xml" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <!-- Start the hero photo right away, before the JS runs (it's the largest thing on screen).
+         Keep these URLs in sync with `heroImage` in src/content.js. -->
     <link
-      href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Crimson+Pro:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap"
-      rel="stylesheet"
+      rel="preload"
+      as="image"
+      media="(max-width: 700px)"
+      imagesrcset="/images/opt/hero-m-720.webp 720w, /images/opt/hero-m-1080.webp 1080w"
+      imagesizes="100vw"
+      fetchpriority="high"
     />
+    <link
+      rel="preload"
+      as="image"
+      media="(min-width: 701px)"
+      imagesrcset="/images/opt/hero-1280.webp 1280w, /images/opt/hero-1920.webp 1920w, /images/opt/hero-2560.webp 2560w"
+      imagesizes="120vw"
+      fetchpriority="high"
+    />
+    <!-- Self-hosted fonts (see @font-face in src/styles.css). -->
+    <link rel="preload" as="font" type="font/woff2" href="/fonts/cinzel-latin.woff2" crossorigin />
+    <link rel="preload" as="font" type="font/woff2" href="/fonts/crimson-pro-latin.woff2" crossorigin />
+    <link rel="icon" href="/images/Crimson_Lotus_Logo_HD.svg" type="image/svg+xml" />
   </head>
   <body>
     <div id="root"></div>

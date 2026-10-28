@@ -1,11 +1,19 @@
 // Edit this file to change site text, images, and links.
 // Put image files in /public/images and reference them as '/images/<file>'.
+// The hero, mission and contact photos are resized copies made by `npm run images`
+// from the originals in /images-src (see scripts/optimize-images.mjs).
 
 export const site = {
   name: 'Crimson Lotus',
   logo: '/images/Crimson_Lotus_Logo_HD.svg',
   lettering: '/images/Crimson_Lotus_Gold_Lettering.svg',
-  heroImage: '/images/heroIMG.jpg',
+  // Also listed in index.html (preload); keep the two in sync.
+  heroImage: {
+    src: '/images/opt/hero-1920.webp',
+    srcSet: '/images/opt/hero-1280.webp 1280w, /images/opt/hero-1920.webp 1920w, /images/opt/hero-2560.webp 2560w',
+    // Phones get a 3:4 crop from the middle of the photo (the part they show anyway).
+    mobileSrcSet: '/images/opt/hero-m-720.webp 720w, /images/opt/hero-m-1080.webp 1080w',
+  },
   tagline: "Welcome to College Station's one and only Lion Dance Team!",
   motto: 'Strength Through Tradition, Power in Motion',
 
@@ -20,7 +28,8 @@ export const site = {
     title: 'Mission Statement',
     text:
       'Crimson Lotus Lion Dance Team is a lion dance team based in College Station, Texas, dedicated to preserving and sharing the art and culture of lion dance with the College Station and Bryan communities. Starting as a group of friends who wanted to continue practicing lion dance while away from home, Crimson Lotus has grown into a team of hardworking members with diverse levels of lion dance experience. Here at Crimson Lotus we want to provide a fun and educational environment to our members and clients throughout Texas!',
-    image: '/images/missionIMG.jpg',
+    image: '/images/opt/mission-960.webp',
+    imageSrcSet: '/images/opt/mission-640.webp 640w, /images/opt/mission-960.webp 960w, /images/opt/mission-1280.webp 1280w',
     imageAlt: 'Lions performing on stage',
   },
 
@@ -62,15 +71,17 @@ export const site = {
 
   contact: {
     title: 'Reach out to us for performances!',
-    backgroundImage: '/images/contactIMG.jpg',
+    // Sizes of the background photo; the page picks one to fit the screen.
+    backgroundSrcSet: '/images/opt/contact-1280.webp 1280w, /images/opt/contact-1920.webp 1920w, /images/opt/contact-2560.webp 2560w',
     // Easter egg: clicking the purple "LEVEL 7" parking sign in the background photo dims
     // the site and plays this.
     easterEgg: {
       image: '/images/surprise.webp',
       alt: 'A team member dancing at night next to a Texas A&M parking sign',
-      // Pixel size of backgroundImage, used to keep the clickable area on the sign at any screen size.
+      // Pixel size of the original background photo (its shape is what matters), used to keep
+      // the clickable area on the sign at any screen size.
       backgroundSize: [5797, 3865],
-      // Clickable area, as [x%, y%] points across/down backgroundImage: the LEVEL 7 sign.
+      // Clickable area, as [x%, y%] points across/down the background photo: the LEVEL 7 sign.
       outline: [[63.6, 47.8], [65.3, 47.8], [65.3, 50.6], [63.6, 50.6]],
     },
     // Shown next to the form as a fallback. The form itself sends through the Cloudflare

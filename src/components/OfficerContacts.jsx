@@ -1,11 +1,15 @@
 import { useEffect, useRef, useState } from 'react';
 import { site } from '../content.js';
+import { useNear } from '../lazyLoad.js';
 
 // Border glow (same idea as the team arch): a photo's border lights up near the cursor.
 const GLOW_RANGE = 90; // px from a border where the glow starts
 
-// Officer photo, or the officer's initials until their photo is added to /public/images/officers.
+// Officer photo (downloaded once it's about a screen away), or the officer's initials until
+// their photo is added to /public/images/officers.
 function OfficerPhoto({ src, name }) {
+  const ref = useRef(null);
+  const near = useNear(ref);
   const [failed, setFailed] = useState(!src);
   if (failed) {
     const initials = name
@@ -18,14 +22,19 @@ function OfficerPhoto({ src, name }) {
       </div>
     );
   }
-  return <img className="officer-photo" src={src} alt="" loading="lazy" onError={() => setFailed(true)} />;
+  return <img ref={ref} className="officer-photo" src={near ? src : undefined} alt="" onError={() => setFailed(true)} />;
 }
 
 // Photo with a second photo behind it: a click flashes the border and crossfades between them.
 function SwappablePhoto({ person }) {
   const [showAlt, setShowAlt] = useState(false);
   const [flashing, setFlashing] = useState(false);
+  // The second photo downloads only once someone points at, focuses or taps this one, and the
+  // crossfade waits until it has arrived.
+  const [wantAlt, setWantAlt] = useState(false);
+  const [altReady, setAltReady] = useState(false);
   const toggle = () => {
+    setWantAlt(true);
     setShowAlt((value) => !value);
     // Restart the flash even on quick repeat clicks.
     setFlashing(false);
@@ -34,14 +43,18 @@ function SwappablePhoto({ person }) {
   return (
     <button
       type="button"
-      className={`officer-swap${showAlt ? ' is-alt' : ''}${flashing ? ' is-flashing' : ''}`}
+      className={`officer-swap${showAlt && altReady ? ' is-alt' : ''}${flashing ? ' is-flashing' : ''}`}
       aria-pressed={showAlt}
       aria-label={`Surprise! Swap ${person.name}'s photo`}
       onClick={toggle}
+      onPointerEnter={() => setWantAlt(true)}
+      onFocus={() => setWantAlt(true)}
       onAnimationEnd={(event) => event.target === event.currentTarget.lastChild && setFlashing(false)}
     >
       <OfficerPhoto src={person.photo} name={person.name} />
-      <img className="officer-photo officer-photo-alt" src={person.altPhoto} alt="" loading="lazy" />
+      {wantAlt && (
+        <img className="officer-photo officer-photo-alt" src={person.altPhoto} alt="" onLoad={() => setAltReady(true)} />
+      )}
       <span className="officer-flash" aria-hidden="true" />
     </button>
   );

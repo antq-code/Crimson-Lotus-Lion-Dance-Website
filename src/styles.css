@@ -1,3 +1,21 @@
+/* Self-hosted Latin subsets from Google Fonts (SIL Open Font License; see public/fonts).
+   Both are variable fonts, so one file covers every weight. */
+@font-face {
+  font-family: 'Cinzel';
+  font-style: normal;
+  font-weight: 400 900;
+  font-display: swap;
+  src: url('/fonts/cinzel-latin.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Crimson Pro';
+  font-style: normal;
+  font-weight: 200 900;
+  font-display: swap;
+  src: url('/fonts/crimson-pro-latin.woff2') format('woff2');
+}
+
 :root {
   /* Near-black with a touch of red; the aura background blends against it. */
   --bg: #090606;
@@ -67,6 +85,12 @@ a {
   font-size: clamp(1.8rem, 3vw, 2.6rem);
   text-align: center;
   margin: 0 0 32px;
+}
+
+/* Photo before it starts loading: a dark fill, and no alt text showing through. */
+.photo {
+  background: #2a1a1f;
+  color: transparent;
 }
 
 .photo-placeholder {
@@ -217,7 +241,10 @@ a {
 .hero-image {
   position: absolute;
   inset: 0;
-  background: #2a1a1f center / cover no-repeat;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  background: #2a1a1f;
   /* Fade the photo out (rather than painting a solid colour over it) so it melts into the aura background. */
   -webkit-mask-image: linear-gradient(to bottom, #000 35%, rgba(0, 0, 0, 0.3) 60%, transparent 85%);
   mask-image: linear-gradient(to bottom, #000 35%, rgba(0, 0, 0, 0.3) 60%, transparent 85%);

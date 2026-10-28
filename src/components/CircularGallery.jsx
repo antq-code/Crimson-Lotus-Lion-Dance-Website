@@ -292,6 +292,8 @@ const GalleryCarousel = ({
   useEffect(() => {
     let alive = true;
     fontRef.current = font;
+    // The font is only used for titles; without them, don't download it.
+    if (!showTitles) return undefined;
     resolveFont(font, fontUrl).then(resolved => {
       if (!alive) return;
       fontRef.current = resolved;
@@ -300,7 +302,7 @@ const GalleryCarousel = ({
     return () => {
       alive = false;
     };
-  }, [font, fontUrl]);
+  }, [font, fontUrl, showTitles]);
 
   useEffect(() => {
     const container = containerRef.current;

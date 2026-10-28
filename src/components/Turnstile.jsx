@@ -1,4 +1,5 @@
 import { forwardRef, useEffect, useImperativeHandle, useRef } from 'react';
+import { useNear } from '../lazyLoad.js';
 
 // Explicit rendering so React controls when the widget mounts, resets, and unmounts.
 const SCRIPT_SRC = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
@@ -22,9 +23,12 @@ function loadTurnstile() {
 
 // Cloudflare Turnstile widget. The mode (managed) is set on the widget in the Cloudflare dashboard.
 // onToken receives the token, or '' when it expires, errors, or is reset.
+// It loads only once the form is about a screen away: on the live site its check downloads
+// close to 900 KB, which visitors who never reach the form shouldn't pay for.
 const Turnstile = forwardRef(function Turnstile({ siteKey, onToken, onError }, ref) {
   const containerRef = useRef(null);
   const widgetId = useRef(null);
+  const near = useNear(containerRef);
   const handlers = useRef({ onToken, onError });
   handlers.current = { onToken, onError };
 
@@ -36,6 +40,7 @@ const Turnstile = forwardRef(function Turnstile({ siteKey, onToken, onError }, r
   }), []);
 
   useEffect(() => {
+    if (!near) return undefined;
     let cancelled = false;
     loadTurnstile()
       .then((turnstile) => {
@@ -62,7 +67,7 @@ const Turnstile = forwardRef(function Turnstile({ siteKey, onToken, onError }, r
         widgetId.current = null;
       }
     };
-  }, [siteKey]);
+  }, [siteKey, near]);
 
   return <div ref={containerRef} className="turnstile" />;
 });
