@@ -10,7 +10,10 @@
   --crimson: #d51f1f;
   --crimson-dark: #be0c0b;
   --radius: 14px;
+  /* Cinzel: headings, navigation, buttons and short labels (motto, officer names).
+     Crimson Pro: everything else (sentences, details, form, footer). */
   --serif: 'Cinzel', Georgia, serif;
+  --body: 'Crimson Pro', Georgia, serif;
 }
 
 *,
@@ -28,8 +31,21 @@ body {
   margin: 0;
   background: var(--bg);
   color: var(--text);
-  font-family: var(--serif);
+  font-family: var(--body);
   -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+.nav,
+button,
+.team-motto,
+.officer-name {
+  font-family: var(--serif);
 }
 
 img {
@@ -524,15 +540,15 @@ a {
 .officer-role,
 .officer-language {
   margin-top: 4px;
-  font-size: 0.95rem;
+  font-size: 1.05rem;
   color: var(--muted);
 }
 
 .officer-phone {
   display: inline-block;
   margin-top: 14px;
-  font-family: system-ui, sans-serif;
-  font-size: 1rem;
+  font-family: var(--body);
+  font-size: 1.15rem;
   letter-spacing: 0.02em;
   text-decoration: none;
   transition: color 0.2s;
@@ -638,7 +654,7 @@ a {
 
 .egg-loading {
   color: var(--muted);
-  font-size: 1rem;
+  font-size: 1.1rem;
 }
 
 .egg-close {
@@ -682,13 +698,13 @@ a {
   gap: 22px;
   width: min(500px, 100%);
   margin-left: 40px;
-  font-family: system-ui, sans-serif;
+  font-family: var(--body);
 }
 
 .contact-form label {
   display: grid;
   gap: 10px;
-  font-size: 0.72rem;
+  font-size: 0.88rem;
   font-weight: 600;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -704,7 +720,7 @@ a {
   background: #fff;
   color: #111;
   font: inherit;
-  font-size: 0.95rem;
+  font-size: 1.1rem;
   font-weight: 400;
   letter-spacing: normal;
   text-transform: none;
@@ -746,7 +762,7 @@ a {
 
 .form-note {
   margin: 0;
-  font-size: 0.8rem;
+  font-size: 1rem;
   color: var(--muted);
 }
 
@@ -775,7 +791,7 @@ a {
 
 .form-status {
   margin: 0;
-  font-size: 0.95rem;
+  font-size: 1.1rem;
   line-height: 1.4;
 }
 
@@ -794,8 +810,8 @@ a {
 .contact-fallback {
   width: fit-content;
   margin: 36px 0 0 40px;
-  font-family: system-ui, sans-serif;
-  font-size: 0.95rem;
+  font-family: var(--body);
+  font-size: 1.1rem;
 }
 
 .contact-fallback p {
@@ -822,7 +838,7 @@ a {
   border-radius: 8px;
   background: transparent;
   color: var(--gold-light);
-  font: inherit;
+  font-family: var(--serif);
   font-size: 0.85rem;
   cursor: pointer;
   transition: background 0.2s;
@@ -905,7 +921,7 @@ a {
 .footer {
   padding: 24px;
   text-align: center;
-  font-size: 0.85rem;
+  font-size: 1rem;
   color: #8d8676;
 }
 

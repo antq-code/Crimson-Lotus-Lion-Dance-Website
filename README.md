@@ -21,4 +21,4 @@ GitHub Actions deploys on every push to `main`:
 - Logo, Lettering, Color Assets: Crimson Lotus Lion Dance Team
 - Interactive grid overlay, Glowing border edge: Found on ReactBits.dev
 - Gradient background: Found on auragradients.vercel.app
-- Font: Google Cinzel
+- Font: Google Cinzel, Google Crimson Pro
